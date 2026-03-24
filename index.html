@@ -811,6 +811,62 @@
     }
 
     .hidden-page { display: none; }
+/* ===== DÁN Ở ĐÂY ===== */
+select {
+  background: #1e2f4a;
+  color: #ffffff;
+  border: 1px solid rgba(255,255,255,0.2);
+  font-weight: 500;
+}
+
+select option {
+  background: #1e2f4a;
+  color: #ffffff;
+  padding: 10px;
+}
+
+select option:checked {
+  background: #f7c56a;
+  color: #000;
+}
+
+select option:hover {
+  background: #2f4a6a;
+}
+
+/* FIX HEADER CHE NỘI DUNG */
+#page-properties,
+#page-detail,
+#page-contact {
+  padding-top: 100px;
+}
+
+/* FIX CARD KHÔNG ĐỀU */
+.property-grid {
+  align-items: stretch;
+}
+
+.property-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.property-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.property-desc {
+  min-height: 110px;
+}
+
+.property-actions {
+  margin-top: auto;
+}
+
+/* ===== HẾT ===== */
 
     @media (max-width: 1100px) {
       .hero-grid,
