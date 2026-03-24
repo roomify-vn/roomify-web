@@ -47,12 +47,12 @@
       margin: 0 auto;
     }
 
-    .glass {
-      background: var(--card);
-      border: 1px solid var(--line);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(12px);
-    }
+ .glass {
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.22);
+  backdrop-filter: blur(6px);
+}}
 
     .section {
       padding: 76px 0;
@@ -80,7 +80,7 @@
       font-weight: 700;
     }
 
-    .btn:hover { transform: translateY(-2px); }
+    .btn:hover { transform: translateY(-1px); }
     .btn-primary {
       color: #1e1200;
       background: linear-gradient(135deg, #ffd992, #f2b142 60%, #d4871f);
@@ -93,14 +93,13 @@
     }
     .btn-block { width: 100%; }
 
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      background: rgba(6,16,29,0.75);
-      backdrop-filter: blur(14px);
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-    }
+  header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(6,16,29,0.92);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
 
     .header-wrap {
       display: flex;
@@ -413,7 +412,7 @@
       border: 1px solid rgba(255,255,255,.08);
       transition: .25s ease;
     }
-    .feature-card:hover { transform: translateY(-4px); background: rgba(255,255,255,.07); }
+    .feature-card:hover { transform: translateY(-2px); background: rgba(255,255,255,.07); }
 
     .icon-box {
       width: 52px;
@@ -474,7 +473,7 @@
       box-shadow: var(--shadow);
     }
 
-    .property-card:hover { transform: translateY(-6px); }
+    .property-card:hover { transform: translateY(-3px); }
 
     .property-cover {
       position: relative;
@@ -482,13 +481,16 @@
       overflow: hidden;
       background: linear-gradient(160deg, #173153 0%, #101d34 40%, #0c1424 100%);
     }
-.property-card:hover .property-cover img {
-  transform: scale(1.05);
-    width: 100%;
+.property-cover img {
+  width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
   transition: transform 0.3s ease;
+}
+
+.property-card:hover .property-cover img {
+  transform: scale(1.03);
 }
     .badge-row {
       position: absolute;
@@ -1444,7 +1446,7 @@ image: "link_ảnh",
     <div class="badge">${property.featured ? '⭐ Nổi bật' : '🏠 Gợi ý'}</div>
     <div class="badge">${formatBadge(property)}</div>
   </div>
-  <img src="${property.image}" alt="${property.name}">
+<img src="${property.image}" alt="${property.name}">
 </div>
           <div class="property-content">
             <div class="property-top">
@@ -1525,7 +1527,12 @@ image: "link_ảnh",
       document.getElementById('detailLocation').textContent = `${property.type} • ${property.location}`;
       document.getElementById('detailPrice').textContent = property.price;
       document.getElementById('detailDesc').textContent = property.desc;
-      document.getElementById('detailVR').src = property.vr;
+    const vrFrame = document.getElementById('detailVR');
+vrFrame.src = '';
+
+setTimeout(() => {
+  vrFrame.src = property.vr;
+}, 300);
 
       document.getElementById('detailTags').innerHTML = property.tags.map(tag => `<span class="detail-tag">${tag}</span>`).join('');
       document.getElementById('detailMeta').innerHTML = `
@@ -1656,8 +1663,6 @@ window.__currentGallery = gallery;
     document.getElementById('priceFilter')?.addEventListener('change', renderProperties);
 
     fillHouseSelect();
-    renderProperties();
-    renderDetail(1);
     navigate('home');
   </script>
 </body>
