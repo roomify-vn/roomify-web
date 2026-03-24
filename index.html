@@ -192,7 +192,7 @@
 
     .hero-grid {
       display: grid;
-      grid-template-columns: 1.1fr .9fr;
+    grid-template-columns: 1fr 1fr;
       gap: 28px;
       align-items: center;
     }
@@ -236,6 +236,7 @@
     .stat-label { color: var(--muted); font-size: 14px; margin-top: 8px; }
 
     .hero-visual {
+       display: none;
       position: relative;
       min-height: 540px;
       border-radius: 34px;
@@ -1220,7 +1221,9 @@ select option:hover {
   .house-hero {
     min-height: 420px;
   }
-
+.house-hero {
+  display: block !important;
+}
   .hero-side-cards {
     display: none;
   }
