@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roomify - Xem nhà bằng VR</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --bg-soft: #0d1b2f;
+      --card: rgba(255,255,255,0.06);
+      --card-strong: rgba(255,255,255,0.1);
+      --text: #eef4ff;
+      --muted: #9fb0cc;
+      --gold: #f7c56a;
+      --gold-2: #d88b1f;
+      --line: rgba(255,255,255,0.12);
+      --ok: #6de2b3;
+      --danger: #ff8080;
+      --shadow: 0 20px 60px rgba(0,0,0,0.35);
+      --radius: 24px;
+      --radius-sm: 16px;
+      --container: 1180px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(247,197,106,0.12), transparent 30%),
+        radial-gradient(circle at top right, rgba(87,123,255,0.13), transparent 28%),
+        linear-gradient(180deg, #06101d 0%, #081425 45%, #0a1322 100%);
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+    button, input, select, textarea { font: inherit; }
+
+    .container {
+      width: min(var(--container), calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .glass {
+      background: var(--card);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .section {
+      padding: 76px 0;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(247,197,106,0.25);
+      background: rgba(247,197,106,0.08);
+      color: #ffe7b6;
+      font-size: 14px;
+      letter-spacing: .2px;
+    }
+
+    .btn {
+      border: none;
+      cursor: pointer;
+      padding: 14px 18px;
+      border-radius: 16px;
+      transition: .25s ease;
+      font-weight: 700;
+    }
+
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary {
+      color: #1e1200;
+      background: linear-gradient(135deg, #ffd992, #f2b142 60%, #d4871f);
+      box-shadow: 0 10px 30px rgba(242,177,66,.35);
+    }
+    .btn-secondary {
+      background: rgba(255,255,255,.05);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+    .btn-block { width: 100%; }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(6,16,29,0.75);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .header-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      min-height: 76px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .brand-logo {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      overflow: hidden;
+      flex: 0 0 46px;
+      background: linear-gradient(135deg, #14253e, #0d1730);
+      border: 1px solid rgba(255,255,255,0.12);
+      display: grid;
+      place-items: center;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .brand-title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: .3px;
+      color: #ffd18a;
+    }
+
+    .brand-sub {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav a {
+      padding: 11px 14px;
+      border-radius: 12px;
+      color: #dce8ff;
+      font-size: 15px;
+    }
+
+    .nav a:hover,
+    .nav a.active {
+      background: rgba(255,255,255,.06);
+    }
+
+    .menu-btn {
+      display: none;
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--line);
+      color: white;
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      cursor: pointer;
+    }
+
+    .mobile-menu {
+      display: none;
+      padding-bottom: 18px;
+    }
+
+    .mobile-menu.open { display: block; }
+    .mobile-menu a {
+      display: block;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.06);
+      margin-top: 10px;
+    }
+
+    .hero {
+      padding: 42px 0 26px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 28px;
+      align-items: center;
+    }
+
+    .hero h1 {
+      font-size: clamp(34px, 5vw, 68px);
+      line-height: 1.02;
+      margin: 18px 0 16px;
+      letter-spacing: -.03em;
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.8;
+      max-width: 720px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 26px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 26px;
+    }
+
+    .stat-card {
+      padding: 18px;
+      border-radius: 22px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .stat-value { font-size: 28px; font-weight: 800; color: #ffd18a; }
+    .stat-label { color: var(--muted); font-size: 14px; margin-top: 8px; }
+
+    .hero-visual {
+      position: relative;
+      min-height: 540px;
+      border-radius: 34px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.1);
+      background:
+        radial-gradient(circle at 30% 20%, rgba(247,197,106,.18), transparent 25%),
+        radial-gradient(circle at 70% 30%, rgba(103,141,255,.16), transparent 26%),
+        linear-gradient(160deg, #0f1e38 0%, #0d182d 45%, #09111e 100%);
+      box-shadow: var(--shadow);
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(10px);
+      opacity: .9;
+    }
+
+    .orb.one { width: 180px; height: 180px; background: rgba(247,197,106,.2); top: 40px; left: 40px; }
+    .orb.two { width: 140px; height: 140px; background: rgba(105,142,255,.2); right: 50px; top: 80px; }
+
+    .mock-window {
+      position: absolute;
+      inset: 26px;
+      border-radius: 28px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.04);
+    }
+
+    .mock-topbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.03);
+    }
+
+    .dot { width: 11px; height: 11px; border-radius: 50%; background: rgba(255,255,255,.18); }
+
+    .mock-content {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      height: calc(100% - 56px);
+    }
+
+    .room-scene {
+      position: relative;
+      background: linear-gradient(180deg, #0d1930, #0b1425 60%, #101d34 100%);
+      overflow: hidden;
+    }
+
+    .scene-floor {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 36%;
+      background: linear-gradient(180deg, #8a5a27, #6a4216);
+      clip-path: polygon(0 20%, 100% 0, 100% 100%, 0 100%);
+      opacity: .8;
+    }
+
+    .scene-wall-left, .scene-wall-right {
+      position: absolute;
+      top: 0;
+      bottom: 28%;
+      width: 52%;
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+    }
+
+    .scene-wall-left { left: 0; clip-path: polygon(0 0, 90% 8%, 78% 100%, 0 100%); }
+    .scene-wall-right { right: 0; clip-path: polygon(10% 8%, 100% 0, 100% 100%, 22% 100%); }
+
+    .window-light {
+      position: absolute;
+      top: 16%;
+      left: 44%;
+      width: 86px;
+      height: 86px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(255,216,138,.9), rgba(255,216,138,.16));
+      box-shadow: 0 0 40px rgba(255,216,138,.35);
+    }
+
+    .sofa {
+      position: absolute;
+      bottom: 18%;
+      left: 16%;
+      width: 180px;
+      height: 86px;
+      border-radius: 28px;
+      background: linear-gradient(180deg, #d0d8e9, #9ca7bd);
+      box-shadow: 0 20px 30px rgba(0,0,0,.2);
+    }
+
+    .table {
+      position: absolute;
+      bottom: 14%;
+      right: 18%;
+      width: 120px;
+      height: 62px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #70553f, #4c3726);
+    }
+
+    .hotspot {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #ffd18a;
+      box-shadow: 0 0 0 8px rgba(255,209,138,.18), 0 0 30px rgba(255,209,138,.45);
+      animation: pulse 2s infinite;
+    }
+
+    .hotspot.one { left: 32%; top: 52%; }
+    .hotspot.two { right: 26%; bottom: 30%; }
+    .hotspot.three { left: 52%; top: 28%; }
+
+    @keyframes pulse {
+      0% { transform: scale(.95); }
+      50% { transform: scale(1.12); }
+      100% { transform: scale(.95); }
+    }
+
+    .vr-panel {
+      padding: 18px;
+      border-left: 1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.12);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .mini-card {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.06);
+    }
+
+    .mini-card h4 { margin: 0 0 10px; font-size: 16px; }
+    .mini-card p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 26px;
+    }
+
+    .section-head h2 {
+      margin: 10px 0 0;
+      font-size: clamp(28px, 4vw, 42px);
+      letter-spacing: -.02em;
+    }
+
+    .section-head p { margin: 8px 0 0; color: var(--muted); max-width: 700px; line-height: 1.8; }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+
+    .feature-card {
+      padding: 22px;
+      border-radius: 24px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.08);
+      transition: .25s ease;
+    }
+    .feature-card:hover { transform: translateY(-4px); background: rgba(255,255,255,.07); }
+
+    .icon-box {
+      width: 52px;
+      height: 52px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(255,217,146,.22), rgba(216,139,31,.18));
+      font-size: 24px;
+      margin-bottom: 14px;
+    }
+
+    .feature-card h3 { margin: 0 0 8px; font-size: 18px; }
+    .feature-card p { margin: 0; color: var(--muted); line-height: 1.75; font-size: 14.5px; }
+
+    .filters {
+      padding: 18px;
+      border-radius: 22px;
+      display: grid;
+      grid-template-columns: 1.3fr 1fr 1fr 1fr auto;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .field {
+      position: relative;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.05);
+      color: white;
+      padding: 14px 14px;
+      border-radius: 16px;
+      outline: none;
+    }
+
+    .field textarea { min-height: 132px; resize: vertical; }
+    .field input::placeholder,
+    .field textarea::placeholder { color: #9fb0cc; }
+
+    .property-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .property-card {
+      overflow: hidden;
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.05);
+      transition: .28s ease;
+      box-shadow: var(--shadow);
+    }
+
+    .property-card:hover { transform: translateY(-6px); }
+
+    .property-cover {
+      position: relative;
+      height: 230px;
+      overflow: hidden;
+      background: linear-gradient(160deg, #173153 0%, #101d34 40%, #0c1424 100%);
+    }
+
+    .badge-row {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      right: 14px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(7,17,31,.65);
+      border: 1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(8px);
+    }
+
+    .cover-house {
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 100%;
+    }
+
+    .sky {
+      position: absolute;
+      inset: 0 0 30% 0;
+      background: linear-gradient(180deg, rgba(117,165,255,.26), transparent);
+    }
+
+    .house-body {
+      position: absolute;
+      right: 16%;
+      bottom: 14%;
+      width: 48%;
+      height: 34%;
+      background: linear-gradient(180deg, #f6f1e8, #d7cfc4);
+      border-radius: 8px 8px 10px 10px;
+      box-shadow: 0 18px 25px rgba(0,0,0,.2);
+    }
+
+    .roof {
+      position: absolute;
+      right: 13%;
+      bottom: 44%;
+      width: 54%;
+      height: 18%;
+      background: linear-gradient(180deg, #6a4225, #513118);
+      clip-path: polygon(0 100%, 50% 10%, 100% 100%);
+    }
+
+    .window, .door {
+      position: absolute;
+      background: linear-gradient(180deg, #6c87b4, #243651);
+      border-radius: 6px;
+    }
+
+    .window.w1 { width: 16%; height: 18%; right: 26%; bottom: 24%; }
+    .window.w2 { width: 10%; height: 18%; right: 44%; bottom: 24%; }
+    .door { width: 12%; height: 24%; right: 12%; bottom: 14%; background: linear-gradient(180deg, #5d412a, #3b2718); }
+
+    .tree {
+      position: absolute;
+      left: 15%;
+      bottom: 16%;
+      width: 70px;
+      height: 120px;
+    }
+
+    .tree::before {
+      content: "";
+      position: absolute;
+      left: 28px;
+      bottom: 0;
+      width: 12px;
+      height: 56px;
+      background: #5a391f;
+      border-radius: 10px;
+    }
+
+    .tree::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #7ae19e, #2d8e59 70%);
+      box-shadow: 0 0 30px rgba(122,225,158,.2);
+    }
+
+    .ground {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 26%;
+      background: linear-gradient(180deg, #294a2e, #1a301d);
+      clip-path: polygon(0 32%, 100% 0, 100% 100%, 0 100%);
+    }
+
+    .property-content {
+      padding: 18px;
+    }
+
+    .property-top {
+      display: flex;
+      gap: 14px;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 10px;
+    }
+
+    .property-title { font-size: 20px; margin: 0; }
+    .property-location { color: var(--muted); font-size: 14px; margin-top: 6px; }
+    .price { font-size: 24px; font-weight: 800; color: #ffd18a; white-space: nowrap; }
+    .property-desc { color: var(--muted); line-height: 1.75; font-size: 14.5px; }
+
+    .property-meta {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .meta-item {
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.06);
+      text-align: center;
+    }
+
+    .meta-item strong { display: block; font-size: 15px; }
+    .meta-item span { font-size: 12.5px; color: var(--muted); }
+
+    .property-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .property-actions .btn { flex: 1; }
+
+    .detail-layout {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .detail-panel {
+      padding: 22px;
+      border-radius: 28px;
+    }
+
+    .gallery-main {
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.04);
+      aspect-ratio: 16/10;
+      position: relative;
+    }
+
+    .gallery-thumbs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .thumb {
+      height: 94px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.08);
+      overflow: hidden;
+      cursor: pointer;
+      opacity: .78;
+      transition: .25s ease;
+    }
+
+    .thumb.active,
+    .thumb:hover { opacity: 1; transform: translateY(-2px); }
+
+    .detail-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: start;
+      margin-bottom: 12px;
+    }
+
+    .detail-head h2 { margin: 0; font-size: 34px; }
+    .detail-head p { margin: 10px 0 0; color: var(--muted); }
+    .price-large { font-size: 36px; font-weight: 900; color: #ffd18a; }
+
+    .detail-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 18px 0 8px;
+    }
+
+    .detail-tag {
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.08);
+      color: #dbe6fb;
+      font-size: 13px;
+    }
+
+    .vr-wrap {
+      overflow: hidden;
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,.08);
+      margin-top: 14px;
+    }
+
+    .vr-wrap iframe {
+      display: block;
+      width: 100%;
+      height: 440px;
+      border: none;
+      background: #000;
+    }
+
+    .amenities {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .amenity {
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.06);
+      color: #dfe9fc;
+      font-size: 14px;
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: .95fr 1.05fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .contact-card, .form-card {
+      padding: 24px;
+      border-radius: 28px;
+    }
+
+    .info-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .info-item {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.06);
+    }
+
+    .info-item strong { display: block; margin-bottom: 6px; }
+    .info-item span { color: var(--muted); font-size: 14.5px; line-height: 1.75; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .note {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-top: 12px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      min-width: 260px;
+      max-width: 360px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(13,27,47,.94);
+      border: 1px solid rgba(109,226,179,.28);
+      color: #dffbef;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: .25s ease;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    .empty {
+      padding: 28px;
+      border-radius: 24px;
+      border: 1px dashed rgba(255,255,255,.15);
+      color: var(--muted);
+      text-align: center;
+      background: rgba(255,255,255,.03);
+    }
+
+    footer {
+      border-top: 1px solid rgba(255,255,255,.08);
+      padding: 28px 0 42px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .hidden-page { display: none; }
+
+    @media (max-width: 1100px) {
+      .hero-grid,
+      .detail-layout,
+      .contact-grid,
+      .mock-content,
+      .section-head,
+      .filters,
+      .feature-grid,
+      .property-grid { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(3, 1fr); }
+      .vr-panel { border-left: none; border-top: 1px solid rgba(255,255,255,.08); }
+      .hero-visual { min-height: 500px; }
+    }
+
+    @media (max-width: 820px) {
+      .nav { display: none; }
+      .menu-btn { display: inline-grid; place-items: center; }
+      .hero { padding-top: 24px; }
+      .stats,
+      .feature-grid,
+      .property-grid,
+      .form-grid,
+      .property-meta,
+      .amenities,
+      .gallery-thumbs { grid-template-columns: 1fr; }
+      .hero-visual { min-height: 420px; }
+      .filters { grid-template-columns: 1fr; }
+      .detail-head { flex-direction: column; }
+      .price-large { font-size: 30px; }
+      .hero p { font-size: 16px; }
+      .brand-sub { display: none; }
+      .header-wrap { min-height: 70px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="header-wrap">
+        <a href="#home" class="brand" onclick="navigate('home')">
+          <div class="brand-logo">
+            <svg viewBox="0 0 64 64" width="34" height="34" aria-hidden="true">
+              <defs>
+                <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#ffe09f"/>
+                  <stop offset="60%" stop-color="#f2b142"/>
+                  <stop offset="100%" stop-color="#b86b14"/>
+                </linearGradient>
+              </defs>
+              <path d="M8 26 L32 12 L56 26 L56 50 L32 38 L8 50 Z" fill="none" stroke="url(#g1)" stroke-width="3.8" stroke-linejoin="round"/>
+              <path d="M16 28 h16 c7 0 10 4 10 8 c0 4-3 8-8 8 h-2 c-2 0-4 2-5 5 l-1 3 l-4-3 c-1-1-2-1-3-1 h-3 c-5 0-8-3-8-8 v-4 c0-5 3-8 8-8z" fill="none" stroke="url(#g1)" stroke-width="3.8" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div>
+            <div class="brand-title">Roomify</div>
+            <div class="brand-sub">See in VR. Price in minutes.</div>
+          </div>
+        </a>
+
+        <nav class="nav" id="desktopNav">
+          <a href="#home" data-page="home" class="active" onclick="navigate('home')">Trang chủ</a>
+          <a href="#features" data-page="features" onclick="scrollToSection('features')">Tính năng</a>
+          <a href="#properties" data-page="properties" onclick="navigate('properties')">Danh sách nhà</a>
+          <a href="#detail" data-page="detail" onclick="navigate('detail', 0)">Chi tiết</a>
+          <a href="#contact" data-page="contact" onclick="navigate('contact')">Đặt lịch</a>
+        </nav>
+
+        <button class="menu-btn" onclick="toggleMobileMenu()" aria-label="Mở menu">
+          ☰
+        </button>
+      </div>
+
+      <div class="mobile-menu" id="mobileMenu">
+        <a href="#home" onclick="navigate('home'); toggleMobileMenu(false)">Trang chủ</a>
+        <a href="#features" onclick="scrollToSection('features'); toggleMobileMenu(false)">Tính năng</a>
+        <a href="#properties" onclick="navigate('properties'); toggleMobileMenu(false)">Danh sách nhà</a>
+        <a href="#detail" onclick="navigate('detail', 0); toggleMobileMenu(false)">Chi tiết</a>
+        <a href="#contact" onclick="navigate('contact'); toggleMobileMenu(false)">Đặt lịch</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="page-home" class="page">
+      <div class="hero">
+        <div class="container hero-grid">
+          <div>
+            <div class="chip">✨ Web demo sản phẩm Roomify</div>
+            <h1>Xem nhà bằng VR cho người bận rộn, ở xa và không muốn đi lại nhiều</h1>
+            <p>
+              Roomify giúp người thuê nhà và người mua nhà tham quan không gian sống từ xa bằng trải nghiệm VR,
+              xem nhanh thông tin căn hộ, so sánh giá và đặt lịch xem thực tế chỉ trong vài phút.
+            </p>
+            <div class="hero-actions">
+              <button class="btn btn-primary" onclick="navigate('properties')">Khám phá danh sách nhà</button>
+              <button class="btn btn-secondary" onclick="navigate('detail', 0)">Xem demo VR ngay</button>
+            </div>
+            <div class="stats">
+              <div class="stat-card">
+                <div class="stat-value">3+</div>
+                <div class="stat-label">Căn nhà demo có VR</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">360°</div>
+                <div class="stat-label">Trải nghiệm tham quan</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">1 phút</div>
+                <div class="stat-label">Đặt lịch xem cực nhanh</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-visual">
+            <div class="orb one"></div>
+            <div class="orb two"></div>
+            <div class="mock-window">
+              <div class="mock-topbar">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+              </div>
+              <div class="mock-content">
+                <div class="room-scene">
+                  <div class="scene-wall-left"></div>
+                  <div class="scene-wall-right"></div>
+                  <div class="window-light"></div>
+                  <div class="sofa"></div>
+                  <div class="table"></div>
+                  <div class="scene-floor"></div>
+                  <div class="hotspot one"></div>
+                  <div class="hotspot two"></div>
+                  <div class="hotspot three"></div>
+                </div>
+                <div class="vr-panel">
+                  <div class="mini-card">
+                    <h4>🎯 Đúng đối tượng sử dụng</h4>
+                    <p>Phù hợp với người đi làm bận rộn, người sống ở xa và người không muốn tốn thời gian đi xem nhiều nơi.</p>
+                  </div>
+                  <div class="mini-card">
+                    <h4>🥽 VR tham quan căn nhà</h4>
+                    <p>Xem bố cục phòng, cảm nhận không gian, định vị nội thất trước khi quyết định đi xem trực tiếp.</p>
+                  </div>
+                  <div class="mini-card">
+                    <h4>📅 Đặt lịch nhanh</h4>
+                    <p>Chọn căn nhà phù hợp, gửi yêu cầu xem thực tế và để lại thông tin liên hệ ngay trên web.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section class="section" id="features">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <div class="chip">Tính năng nổi bật</div>
+              <h2>Website demo theo hướng sản phẩm thật</h2>
+              <p>
+                Không chỉ là landing page giới thiệu, bản này có danh sách nhà, tìm kiếm, trang chi tiết,
+                form liên hệ và tích hợp tour VR cho một số căn mẫu.
+              </p>
+            </div>
+          </div>
+
+          <div class="feature-grid">
+            <div class="feature-card">
+              <div class="icon-box">🥽</div>
+              <h3>Xem nhà bằng VR</h3>
+              <p>Nhúng tour 360° để người dùng trải nghiệm trực quan hơn so với ảnh tĩnh thông thường.</p>
+            </div>
+            <div class="feature-card">
+              <div class="icon-box">🔎</div>
+              <h3>Tìm kiếm & lọc</h3>
+              <p>Lọc theo nhu cầu như loại nhà, khu vực, mức giá và từ khóa để tìm căn phù hợp nhanh hơn.</p>
+            </div>
+            <div class="feature-card">
+              <div class="icon-box">📍</div>
+              <h3>Chi tiết rõ ràng</h3>
+              <p>Hiển thị diện tích, số phòng, vị trí, tiện ích và mô tả để người dùng có đủ thông tin ra quyết định.</p>
+            </div>
+            <div class="feature-card">
+              <div class="icon-box">📩</div>
+              <h3>Đặt lịch xem</h3>
+              <p>Gửi yêu cầu xem nhà thực tế hoặc nhận tư vấn nhanh qua form liên hệ ngay trên website.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <div class="chip">Vì sao Roomify hữu ích?</div>
+              <h2>Giải quyết đúng bài toán người đi thuê và mua nhà</h2>
+            </div>
+          </div>
+          <div class="feature-grid">
+            <div class="feature-card">
+              <div class="icon-box">⏱️</div>
+              <h3>Tiết kiệm thời gian</h3>
+              <p>Không cần đi xem quá nhiều nơi trước. Chỉ đến tận nơi với những căn thực sự phù hợp.</p>
+            </div>
+            <div class="feature-card">
+              <div class="icon-box">🚗</div>
+              <h3>Giảm chi phí đi lại</h3>
+              <p>Đặc biệt hữu ích với người sống xa, làm việc bận hoặc cần tìm nhà ở khu vực chưa quen thuộc.</p>
+            </div>
+            <div class="feature-card">
+              <div class="icon-box">🧠</div>
+              <h3>Dễ so sánh nhiều căn</h3>
+              <p>Nhìn nhanh mức giá, diện tích, vị trí và tiện ích để đưa ra lựa chọn hợp lý hơn.</p>
+            </div>
+            <div class="feature-card">
+              <div class="icon-box">✨</div>
+              <h3>Trải nghiệm hiện đại</h3>
+              <p>Tạo cảm giác đây là một startup công nghệ về bất động sản, không chỉ là website bài tập thông thường.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section id="page-properties" class="page hidden-page section">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="chip">Danh sách nhà</div>
+            <h2>Khám phá căn nhà phù hợp với bạn</h2>
+            <p>Tìm nhanh căn nhà dựa trên từ khóa, loại nhà, khu vực và mức giá. Một số căn có sẵn tour VR để xem trực tiếp.</p>
+          </div>
+        </div>
+
+        <div class="filters glass">
+          <div class="field"><input id="searchInput" type="text" placeholder="Tìm theo tên nhà, địa điểm, mô tả..." /></div>
+          <div class="field">
+            <select id="typeFilter">
+              <option value="all">Tất cả loại nhà</option>
+              <option value="Căn hộ">Căn hộ</option>
+              <option value="Nhà phố">Nhà phố</option>
+              <option value="Studio">Studio</option>
+            </select>
+          </div>
+          <div class="field">
+            <select id="areaFilter">
+              <option value="all">Tất cả khu vực</option>
+              <option value="TP.HCM">TP.HCM</option>
+              <option value="Hà Nội">Hà Nội</option>
+              <option value="Đà Nẵng">Đà Nẵng</option>
+            </select>
+          </div>
+          <div class="field">
+            <select id="priceFilter">
+              <option value="all">Tất cả mức giá</option>
+              <option value="low">Dưới 8 triệu / dưới 3 tỷ</option>
+              <option value="mid">8 - 15 triệu / 3 - 5 tỷ</option>
+              <option value="high">Trên 15 triệu / trên 5 tỷ</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="renderProperties()">Lọc ngay</button>
+        </div>
+
+        <div id="propertyGrid" class="property-grid"></div>
+      </div>
+    </section>
+
+    <section id="page-detail" class="page hidden-page section">
+      <div class="container detail-layout">
+        <div class="detail-panel glass">
+          <div class="gallery-main" id="galleryMain"></div>
+          <div class="gallery-thumbs" id="galleryThumbs"></div>
+        </div>
+
+        <div class="detail-panel glass">
+          <div class="detail-head">
+            <div>
+              <h2 id="detailTitle">Tên căn nhà</h2>
+              <p id="detailLocation">Khu vực</p>
+            </div>
+            <div class="price-large" id="detailPrice">0₫</div>
+          </div>
+
+          <div class="detail-tags" id="detailTags"></div>
+          <p id="detailDesc" class="property-desc"></p>
+
+          <div class="property-meta" id="detailMeta"></div>
+
+          <h3>Tour VR</h3>
+          <div class="vr-wrap">
+            <iframe id="detailVR" allowfullscreen loading="lazy"></iframe>
+          </div>
+
+          <h3 style="margin-top:20px">Tiện ích nổi bật</h3>
+          <div class="amenities" id="detailAmenities"></div>
+
+          <div class="hero-actions" style="margin-top:20px">
+            <button class="btn btn-primary" onclick="prefillContactFromDetail()">Đặt lịch xem căn này</button>
+            <button class="btn btn-secondary" onclick="navigate('properties')">Quay lại danh sách</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-contact" class="page hidden-page section">
+      <div class="container contact-grid">
+        <div class="contact-card glass">
+          <div class="chip">Liên hệ / Đặt lịch</div>
+          <h2 style="font-size:38px; margin:16px 0 12px">Chọn căn phù hợp và gửi yêu cầu ngay</h2>
+          <p class="property-desc">
+            Đây là form demo cho website Roomify. Khi nâng cấp lên backend thật, dữ liệu có thể được lưu vào database,
+            gửi email xác nhận hoặc thông báo tới nhân viên tư vấn.
+          </p>
+
+          <div class="info-list">
+            <div class="info-item">
+              <strong>🏠 Mục tiêu sử dụng</strong>
+              <span>Giúp người thuê nhà, mua nhà, người bận rộn và người ở xa xem nhà nhanh hơn trước khi đi trực tiếp.</span>
+            </div>
+            <div class="info-item">
+              <strong>🥽 VR demo đã sẵn sàng</strong>
+              <span>Một vài căn có tour VR nhúng sẵn để trình bày cho đồ án hoặc demo trước lớp.</span>
+            </div>
+            <div class="info-item">
+              <strong>🚀 Có thể nâng cấp thêm</strong>
+              <span>Thêm đăng nhập, lưu yêu thích, backend thật, dữ liệu động, admin đăng nhà và chatbot tư vấn.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-card glass">
+          <form id="contactForm">
+            <div class="form-grid">
+              <div class="field"><input id="fullName" type="text" placeholder="Họ và tên" required /></div>
+              <div class="field"><input id="phone" type="tel" placeholder="Số điện thoại" required /></div>
+              <div class="field"><input id="email" type="email" placeholder="Email" required /></div>
+              <div class="field">
+                <select id="selectedHouse">
+                  <option value="">Chọn căn nhà muốn xem</option>
+                </select>
+              </div>
+              <div class="field"><input id="appointmentDate" type="date" required /></div>
+              <div class="field">
+                <select id="appointmentTime" required>
+                  <option value="">Chọn khung giờ</option>
+                  <option>09:00</option>
+                  <option>11:00</option>
+                  <option>14:00</option>
+                  <option>16:00</option>
+                  <option>19:00</option>
+                </select>
+              </div>
+            </div>
+            <div class="field" style="margin-top:12px">
+              <textarea id="message" placeholder="Ghi chú thêm: nhu cầu thuê / mua, khu vực ưu tiên, số người ở...">Tôi muốn được tư vấn thêm về căn nhà này.</textarea>
+            </div>
+            <button class="btn btn-primary btn-block" type="submit" style="margin-top:14px">Gửi yêu cầu đặt lịch</button>
+            <div class="note">* Bản hiện tại là demo frontend bằng HTML/CSS/JS. Khi trình bày đồ án, bạn có thể nói đây là nguyên mẫu sản phẩm trước khi tích hợp backend.</div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">© 2026 Roomify. Web demo xem nhà bằng VR cho người bận rộn và người ở xa.</div>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const properties = [
+      {
+        id: 1,
+        name: 'Căn hộ Lumiere Riverside',
+        type: 'Căn hộ',
+        areaGroup: 'TP.HCM',
+        location: 'Thủ Đức, TP.HCM',
+        price: '12 triệu/tháng',
+        priceValue: 12,
+        rooms: 2,
+        area: 68,
+        bathrooms: 2,
+        featured: true,
+        hasVR: true,
+        desc: 'Căn hộ hiện đại dành cho người đi làm bận rộn, gần tuyến giao thông chính, nội thất tối giản và không gian sống thoáng.',
+        amenities: ['Ban công rộng', 'Bãi đỗ xe', 'Bảo vệ 24/7', 'Gym & hồ bơi'],
+        vr: 'https://my.matterport.com/show/?m=J7a8n6r8sHf',
+        tags: ['Có VR', 'Nội thất đầy đủ', 'Phù hợp thuê ở'],
+        galleryTheme: 'warm'
+      },
+      {
+        id: 2,
+        name: 'Nhà phố The Urban Nest',
+        type: 'Nhà phố',
+        areaGroup: 'Hà Nội',
+        location: 'Nam Từ Liêm, Hà Nội',
+        price: '4.6 tỷ',
+        priceValue: 46,
+        rooms: 3,
+        area: 126,
+        bathrooms: 3,
+        featured: true,
+        hasVR: true,
+        desc: 'Nhà phố phù hợp gia đình trẻ hoặc người mua ở lâu dài, thiết kế hiện đại, nhiều ánh sáng và dễ quan sát qua tour VR.',
+        amenities: ['Gara ô tô', 'Bếp lớn', 'Gần trường học', 'Khu dân cư an ninh'],
+        vr: 'https://my.matterport.com/show/?m=SxQL3iGyoDo',
+        tags: ['Có VR', 'Phù hợp mua ở', 'Nhà phố hiện đại'],
+        galleryTheme: 'sunset'
+      },
+      {
+        id: 3,
+        name: 'Studio Minimal Coast',
+        type: 'Studio',
+        areaGroup: 'Đà Nẵng',
+        location: 'Sơn Trà, Đà Nẵng',
+        price: '7.5 triệu/tháng',
+        priceValue: 7.5,
+        rooms: 1,
+        area: 38,
+        bathrooms: 1,
+        featured: false,
+        hasVR: true,
+        desc: 'Studio nhỏ gọn, tiện nghi, phù hợp người sống một mình hoặc làm việc từ xa. Thiết kế tối giản và gần biển.',
+        amenities: ['Gần biển', 'Full nội thất', 'Internet tốc độ cao', 'Khóa cửa thông minh'],
+        vr: 'https://my.matterport.com/show/?m=2jJk0jW5o3f',
+        tags: ['Có VR', 'Giá tốt', 'Phù hợp người độc thân'],
+        galleryTheme: 'coast'
+      },
+      {
+        id: 4,
+        name: 'Căn hộ Green Living Hub',
+        type: 'Căn hộ',
+        areaGroup: 'TP.HCM',
+        location: 'Quận 7, TP.HCM',
+        price: '15 triệu/tháng',
+        priceValue: 15,
+        rooms: 2,
+        area: 72,
+        bathrooms: 2,
+        featured: false,
+        hasVR: false,
+        desc: 'Không gian sống xanh, gần trung tâm thương mại, phù hợp với người làm văn phòng muốn tìm nơi ở tiện nghi.',
+        amenities: ['Khuôn viên xanh', 'Siêu thị gần nhà', 'Khu vui chơi trẻ em', 'Lễ tân 24/7'],
+        vr: 'https://my.matterport.com/show/?m=J7a8n6r8sHf',
+        tags: ['Không gian xanh', 'Căn hộ tiện nghi', 'Gần trung tâm'],
+        galleryTheme: 'forest'
+      },
+      {
+        id: 5,
+        name: 'Nhà phố Golden Lane',
+        type: 'Nhà phố',
+        areaGroup: 'Hà Nội',
+        location: 'Cầu Giấy, Hà Nội',
+        price: '5.8 tỷ',
+        priceValue: 58,
+        rooms: 4,
+        area: 140,
+        bathrooms: 3,
+        featured: false,
+        hasVR: false,
+        desc: 'Mặt tiền đẹp, khu dân cư đông đúc, phù hợp người mua nhà kết hợp ở và kinh doanh nhỏ.',
+        amenities: ['Mặt tiền rộng', 'Khu dân cư sầm uất', 'Gần văn phòng', 'Thiết kế mở'],
+        vr: 'https://my.matterport.com/show/?m=SxQL3iGyoDo',
+        tags: ['Mua ở lâu dài', 'Vị trí đẹp', 'Mặt tiền lớn'],
+        galleryTheme: 'gold'
+      },
+      {
+        id: 6,
+        name: 'Studio Smart Compact',
+        type: 'Studio',
+        areaGroup: 'TP.HCM',
+        location: 'Bình Thạnh, TP.HCM',
+        price: '6.8 triệu/tháng',
+        priceValue: 6.8,
+        rooms: 1,
+        area: 32,
+        bathrooms: 1,
+        featured: true,
+        hasVR: false,
+        desc: 'Studio gọn gàng, phù hợp sinh hoạt cá nhân, tối ưu không gian và vị trí gần khu văn phòng.',
+        amenities: ['Gần trung tâm', 'Máy lạnh', 'Nội thất cơ bản', 'Ra vào vân tay'],
+        vr: 'https://my.matterport.com/show/?m=2jJk0jW5o3f',
+        tags: ['Giá tốt', 'Gọn gàng', 'Ở một mình'],
+        galleryTheme: 'night'
+      }
+    ];
+
+    let currentPage = 'home';
+    let currentProperty = properties[0];
+    let currentGalleryIndex = 0;
+
+    function formatBadge(property) {
+      return property.hasVR ? 'Có VR' : 'Ảnh minh họa';
+    }
+
+    function createSceneHTML(theme = 'warm') {
+      const palette = {
+        warm: ['#173153', '#101d34', '#0c1424', '#2f7a4c'],
+        sunset: ['#5a2d22', '#1a2036', '#0d1322', '#3f6b46'],
+        coast: ['#1b4f73', '#133148', '#0b1522', '#2f6d5e'],
+        forest: ['#234126', '#0f1a19', '#12212d', '#2e6d38'],
+        gold: ['#5c401d', '#171a2b', '#10131f', '#4a6a34'],
+        night: ['#0f2347', '#10182c', '#080f1b', '#234c2b']
+      }[theme] || ['#173153', '#101d34', '#0c1424', '#2f7a4c'];
+
+      return `
+        <div class="cover-house" style="background: linear-gradient(160deg, ${palette[0]} 0%, ${palette[1]} 46%, ${palette[2]} 100%)">
+          <div class="sky"></div>
+          <div class="roof"></div>
+          <div class="house-body"></div>
+          <div class="window w1"></div>
+          <div class="window w2"></div>
+          <div class="door"></div>
+          <div class="tree"></div>
+          <div class="ground" style="background: linear-gradient(180deg, ${palette[3]}, #1a301d)"></div>
+        </div>
+      `;
+    }
+
+    function createGalleryVariants(property) {
+      return [
+        { label: 'Mặt tiền', html: createSceneHTML(property.galleryTheme) },
+        { label: 'Phòng khách', html: `
+          <div class="cover-house" style="background: linear-gradient(180deg, #0d1930, #0b1425 60%, #101d34 100%)">
+            <div class="scene-wall-left"></div>
+            <div class="scene-wall-right"></div>
+            <div class="window-light"></div>
+            <div class="sofa"></div>
+            <div class="table"></div>
+            <div class="scene-floor"></div>
+          </div>
+        `},
+        { label: property.hasVR ? 'VR tour' : 'Không gian', html: `
+          <div class="cover-house" style="background: radial-gradient(circle at 30% 20%, rgba(247,197,106,.18), transparent 25%), linear-gradient(160deg, #0f1e38 0%, #0d182d 45%, #09111e 100%)">
+            <div class="orb one" style="top:50px; left:60px"></div>
+            <div class="orb two" style="top:120px; right:80px"></div>
+            <div class="room-scene" style="position:absolute; inset:20px; border-radius:24px; border:1px solid rgba(255,255,255,.08)">
+              <div class="scene-wall-left"></div>
+              <div class="scene-wall-right"></div>
+              <div class="window-light"></div>
+              <div class="sofa"></div>
+              <div class="table"></div>
+              <div class="scene-floor"></div>
+              <div class="hotspot one"></div>
+              <div class="hotspot two"></div>
+              <div class="hotspot three"></div>
+            </div>
+          </div>
+        `}
+      ];
+    }
+
+    function propertyCardHTML(property) {
+      return `
+        <article class="property-card">
+          <div class="property-cover">
+            <div class="badge-row">
+              <div class="badge">${property.featured ? '⭐ Nổi bật' : '🏠 Gợi ý'}</div>
+              <div class="badge">${formatBadge(property)}</div>
+            </div>
+            ${createSceneHTML(property.galleryTheme)}
+          </div>
+          <div class="property-content">
+            <div class="property-top">
+              <div>
+                <h3 class="property-title">${property.name}</h3>
+                <div class="property-location">📍 ${property.location}</div>
+              </div>
+              <div class="price">${property.price}</div>
+            </div>
+            <p class="property-desc">${property.desc}</p>
+            <div class="property-meta">
+              <div class="meta-item"><strong>${property.area}m²</strong><span>Diện tích</span></div>
+              <div class="meta-item"><strong>${property.rooms} phòng</strong><span>Phòng ngủ</span></div>
+              <div class="meta-item"><strong>${property.bathrooms} WC</strong><span>Phòng tắm</span></div>
+            </div>
+            <div class="property-actions">
+              <button class="btn btn-primary" onclick="navigate('detail', ${property.id})">Xem chi tiết</button>
+              <button class="btn btn-secondary" onclick="quickBook(${property.id})">Đặt lịch</button>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function matchesPrice(property, level) {
+      if (level === 'all') return true;
+      if (level === 'low') return property.priceValue < 8 || property.priceValue < 30;
+      if (level === 'mid') return (property.priceValue >= 8 && property.priceValue <= 15) || (property.priceValue >= 30 && property.priceValue <= 50);
+      if (level === 'high') return property.priceValue > 15 || property.priceValue > 50;
+      return true;
+    }
+
+    function renderProperties() {
+      const keyword = document.getElementById('searchInput')?.value?.trim().toLowerCase() || '';
+      const type = document.getElementById('typeFilter')?.value || 'all';
+      const area = document.getElementById('areaFilter')?.value || 'all';
+      const price = document.getElementById('priceFilter')?.value || 'all';
+
+      const filtered = properties.filter(p => {
+        const matchKeyword = !keyword || [p.name, p.location, p.desc, p.type].join(' ').toLowerCase().includes(keyword);
+        const matchType = type === 'all' || p.type === type;
+        const matchArea = area === 'all' || p.areaGroup === area;
+        const matchPrice = matchesPrice(p, price);
+        return matchKeyword && matchType && matchArea && matchPrice;
+      });
+
+      const grid = document.getElementById('propertyGrid');
+      if (!grid) return;
+
+      if (!filtered.length) {
+        grid.innerHTML = `<div class="empty" style="grid-column:1/-1">Không tìm thấy căn nhà phù hợp. Hãy thử đổi bộ lọc hoặc từ khóa tìm kiếm.</div>`;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(propertyCardHTML).join('');
+    }
+
+    function renderDetail(propertyId) {
+      const property = properties.find(p => p.id === Number(propertyId)) || properties[0];
+      currentProperty = property;
+      currentGalleryIndex = 0;
+
+      document.getElementById('detailTitle').textContent = property.name;
+      document.getElementById('detailLocation').textContent = `${property.type} • ${property.location}`;
+      document.getElementById('detailPrice').textContent = property.price;
+      document.getElementById('detailDesc').textContent = property.desc;
+      document.getElementById('detailVR').src = property.vr;
+
+      document.getElementById('detailTags').innerHTML = property.tags.map(tag => `<span class="detail-tag">${tag}</span>`).join('');
+      document.getElementById('detailMeta').innerHTML = `
+        <div class="meta-item"><strong>${property.area}m²</strong><span>Diện tích</span></div>
+        <div class="meta-item"><strong>${property.rooms} phòng</strong><span>Phòng ngủ</span></div>
+        <div class="meta-item"><strong>${property.bathrooms} WC</strong><span>Phòng tắm</span></div>
+      `;
+      document.getElementById('detailAmenities').innerHTML = property.amenities.map(item => `<div class="amenity">✓ ${item}</div>`).join('');
+
+      const gallery = createGalleryVariants(property);
+      const main = document.getElementById('galleryMain');
+      const thumbs = document.getElementById('galleryThumbs');
+      main.innerHTML = gallery[0].html;
+      thumbs.innerHTML = gallery.map((item, index) => `
+        <div class="thumb ${index === 0 ? 'active' : ''}" onclick="setGallery(${index})">
+          <div style="height:100%; position:relative">${item.html}</div>
+        </div>
+      `).join('');
+
+      window.__currentGallery = gallery;
+    }
+
+    function setGallery(index) {
+      currentGalleryIndex = index;
+      const gallery = window.__currentGallery || createGalleryVariants(currentProperty);
+      document.getElementById('galleryMain').innerHTML = gallery[index].html;
+      document.querySelectorAll('.thumb').forEach((thumb, i) => {
+        thumb.classList.toggle('active', i === index);
+      });
+    }
+
+    function fillHouseSelect() {
+      const select = document.getElementById('selectedHouse');
+      select.innerHTML = `<option value="">Chọn căn nhà muốn xem</option>` + properties.map(p => `<option value="${p.id}">${p.name} - ${p.location}</option>`).join('');
+    }
+
+    function quickBook(id) {
+      navigate('contact');
+      setTimeout(() => {
+        const select = document.getElementById('selectedHouse');
+        if (select) select.value = String(id);
+      }, 0);
+    }
+
+    function prefillContactFromDetail() {
+      navigate('contact');
+      setTimeout(() => {
+        const select = document.getElementById('selectedHouse');
+        const message = document.getElementById('message');
+        if (select) select.value = String(currentProperty.id);
+        if (message) message.value = `Tôi muốn đặt lịch xem thực tế căn "${currentProperty.name}". Mong được tư vấn thêm về tình trạng nhà, mức giá và thời gian xem phù hợp.`;
+      }, 0);
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+
+    function navigate(page, propertyId = null) {
+      currentPage = page;
+      document.querySelectorAll('.page').forEach(section => section.classList.add('hidden-page'));
+      const target = document.getElementById(`page-${page}`);
+      if (target) target.classList.remove('hidden-page');
+      if (page === 'properties') renderProperties();
+      if (page === 'detail') renderDetail(propertyId || currentProperty?.id || 1);
+      updateNav(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateNav(page) {
+      document.querySelectorAll('#desktopNav a').forEach(a => {
+        a.classList.toggle('active', a.dataset.page === page);
+      });
+    }
+
+    function scrollToSection(id) {
+      navigate('home');
+      setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 80);
+    }
+
+    function toggleMobileMenu(force) {
+      const menu = document.getElementById('mobileMenu');
+      if (typeof force === 'boolean') {
+        menu.classList.toggle('open', force);
+      } else {
+        menu.classList.toggle('open');
+      }
+    }
+
+    document.getElementById('contactForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('fullName').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const houseId = document.getElementById('selectedHouse').value;
+      const date = document.getElementById('appointmentDate').value;
+      const time = document.getElementById('appointmentTime').value;
+
+      if (!name || !phone || !email || !date || !time) {
+        showToast('Vui lòng nhập đầy đủ thông tin trước khi gửi yêu cầu.');
+        return;
+      }
+
+      const houseName = properties.find(p => String(p.id) === houseId)?.name || 'căn nhà bạn quan tâm';
+      showToast(`Đã ghi nhận yêu cầu đặt lịch xem ${houseName}. Đây là demo frontend nên dữ liệu chưa được lưu vào server.`);
+      this.reset();
+      fillHouseSelect();
+    });
+
+    document.getElementById('searchInput')?.addEventListener('input', renderProperties);
+    document.getElementById('typeFilter')?.addEventListener('change', renderProperties);
+    document.getElementById('areaFilter')?.addEventListener('change', renderProperties);
+    document.getElementById('priceFilter')?.addEventListener('change', renderProperties);
+
+    fillHouseSelect();
+    renderProperties();
+    renderDetail(1);
+    navigate('home');
+  </script>
+</body>
+</html>
