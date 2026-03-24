@@ -1250,127 +1250,152 @@ select option:hover {
   <div class="toast" id="toast"></div>
 
   <script>
-    const properties = [
-      {
-        id: 1,
-        name: 'Căn hộ Lumiere Riverside',
-        type: 'Căn hộ',
-        areaGroup: 'TP.HCM',
-        location: 'Thủ Đức, TP.HCM',
-        price: '12 triệu/tháng',
-        priceValue: 12,
-        rooms: 2,
-        area: 68,
-        bathrooms: 2,
-        featured: true,
-        hasVR: true,
-        desc: 'Căn hộ hiện đại dành cho người đi làm bận rộn, gần tuyến giao thông chính, nội thất tối giản và không gian sống thoáng.',
-        amenities: ['Ban công rộng', 'Bãi đỗ xe', 'Bảo vệ 24/7', 'Gym & hồ bơi'],
-    vr: 'https://my.matterport.com/show/?m=bVZzGXzms8Z',
-        tags: ['Có VR', 'Nội thất đầy đủ', 'Phù hợp thuê ở'],
-galleryTheme: 'warm',
-image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80",
-      },
-      {
-        id: 2,
-        name: 'Nhà phố The Urban Nest',
-        type: 'Nhà phố',
-        areaGroup: 'Hà Nội',
-        location: 'Nam Từ Liêm, Hà Nội',
-        price: '4.6 tỷ',
-        priceValue: 46,
-        rooms: 3,
-        area: 126,
-        bathrooms: 3,
-        featured: true,
-        hasVR: true,
-        desc: 'Nhà phố phù hợp gia đình trẻ hoặc người mua ở lâu dài, thiết kế hiện đại, nhiều ánh sáng và dễ quan sát qua tour VR.',
-        amenities: ['Gara ô tô', 'Bếp lớn', 'Gần trường học', 'Khu dân cư an ninh'],
-      vr: 'https://my.matterport.com/show/?m=doiCgKgUuRV',
-        tags: ['Có VR', 'Phù hợp mua ở', 'Nhà phố hiện đại'],
-galleryTheme: 'warm',
-image: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=800&q=80",
-      },
-      {
-        id: 3,
-        name: 'Studio Minimal Coast',
-        type: 'Studio',
-        areaGroup: 'Đà Nẵng',
-        location: 'Sơn Trà, Đà Nẵng',
-        price: '7.5 triệu/tháng',
-        priceValue: 7.5,
-        rooms: 1,
-        area: 38,
-        bathrooms: 1,
-        featured: false,
-        hasVR: true,
-        desc: 'Studio nhỏ gọn, tiện nghi, phù hợp người sống một mình hoặc làm việc từ xa. Thiết kế tối giản và gần biển.',
-        amenities: ['Gần biển', 'Full nội thất', 'Internet tốc độ cao', 'Khóa cửa thông minh'],
-     vr: 'https://my.matterport.com/show/?m=WMo88QtrD3A',
-        tags: ['Có VR', 'Giá tốt', 'Phù hợp người độc thân'],
-galleryTheme: 'warm',
-image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",      },
-      {
-        id: 4,
-        name: 'Căn hộ Green Living Hub',
-        type: 'Căn hộ',
-        areaGroup: 'TP.HCM',
-        location: 'Quận 7, TP.HCM',
-        price: '15 triệu/tháng',
-        priceValue: 15,
-        rooms: 2,
-        area: 72,
-        bathrooms: 2,
-        featured: false,
+   const properties = [
+  {
+    id: 1,
+    name: 'Căn hộ Lumiere Riverside',
+    type: 'Căn hộ',
+    areaGroup: 'TP.HCM',
+    location: 'Thủ Đức, TP.HCM',
+    price: '12 triệu/tháng',
+    priceValue: 12,
+    rooms: 2,
+    area: 68,
+    bathrooms: 2,
+    featured: true,
     hasVR: true,
-        desc: 'Không gian sống xanh, gần trung tâm thương mại, phù hợp với người làm văn phòng muốn tìm nơi ở tiện nghi.',
-        amenities: ['Khuôn viên xanh', 'Siêu thị gần nhà', 'Khu vui chơi trẻ em', 'Lễ tân 24/7'],
-      vr: 'https://my.matterport.com/show/?m=rX9xYJkbR6X',
-        tags: ['Không gian xanh', 'Căn hộ tiện nghi', 'Gần trung tâm'],
-     galleryTheme: 'warm',
-image: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=80",
-      },
-      {
-        id: 5,
-        name: 'Nhà phố Golden Lane',
-        type: 'Nhà phố',
-        areaGroup: 'Hà Nội',
-        location: 'Cầu Giấy, Hà Nội',
-        price: '5.8 tỷ',
-        priceValue: 58,
-        rooms: 4,
-        area: 140,
-        bathrooms: 3,
-        featured: false,
-     hasVR: true,
-        desc: 'Mặt tiền đẹp, khu dân cư đông đúc, phù hợp người mua nhà kết hợp ở và kinh doanh nhỏ.',
-        amenities: ['Mặt tiền rộng', 'Khu dân cư sầm uất', 'Gần văn phòng', 'Thiết kế mở'],
-        vr: 'https://my.matterport.com/show/?m=SxQL3iGyoDo',
-        tags: ['Mua ở lâu dài', 'Vị trí đẹp', 'Mặt tiền lớn'],
-      galleryTheme: 'warm',
-image: "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=800&q=80",
-      },
-      {
-        id: 6,
-        name: 'Studio Smart Compact',
-        type: 'Studio',
-        areaGroup: 'TP.HCM',
-        location: 'Bình Thạnh, TP.HCM',
-        price: '6.8 triệu/tháng',
-        priceValue: 6.8,
-        rooms: 1,
-        area: 32,
-        bathrooms: 1,
-        featured: true,
-   hasVR: true,
-        desc: 'Studio gọn gàng, phù hợp sinh hoạt cá nhân, tối ưu không gian và vị trí gần khu văn phòng.',
-        amenities: ['Gần trung tâm', 'Máy lạnh', 'Nội thất cơ bản', 'Ra vào vân tay'],
-        vr: 'https://my.matterport.com/show/?m=i81gEraWpeJ',
-        tags: ['Giá tốt', 'Gọn gàng', 'Ở một mình'],
-galleryTheme: 'warm',
-image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80",
-      }
-    ];
+    desc: 'Căn hộ hiện đại dành cho người đi làm bận rộn, gần tuyến giao thông chính, nội thất tối giản và không gian sống thoáng.',
+    amenities: ['Ban công rộng', 'Bãi đỗ xe', 'Bảo vệ 24/7', 'Gym & hồ bơi'],
+    vr: 'https://my.matterport.com/show/?m=bVZzGXzms8Z',
+    tags: ['Có VR', 'Nội thất đầy đủ', 'Phù hợp thuê ở'],
+    image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80'
+    ]
+  },
+  {
+    id: 2,
+    name: 'Nhà phố The Urban Nest',
+    type: 'Nhà phố',
+    areaGroup: 'Hà Nội',
+    location: 'Nam Từ Liêm, Hà Nội',
+    price: '4.6 tỷ',
+    priceValue: 4.6,
+    rooms: 3,
+    area: 126,
+    bathrooms: 3,
+    featured: true,
+    hasVR: true,
+    desc: 'Nhà phố phù hợp gia đình trẻ hoặc người mua ở lâu dài, thiết kế hiện đại, nhiều ánh sáng và dễ quan sát qua tour VR.',
+    amenities: ['Gara ô tô', 'Bếp lớn', 'Gần trường học', 'Khu dân cư an ninh'],
+    vr: 'https://my.matterport.com/show/?m=doiCgKgUuRV',
+    tags: ['Có VR', 'Phù hợp mua ở', 'Nhà phố hiện đại'],
+    image: 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=1200&q=80'
+    ]
+  },
+  {
+    id: 3,
+    name: 'Studio Minimal Coast',
+    type: 'Studio',
+    areaGroup: 'Đà Nẵng',
+    location: 'Sơn Trà, Đà Nẵng',
+    price: '7.5 triệu/tháng',
+    priceValue: 7.5,
+    rooms: 1,
+    area: 38,
+    bathrooms: 1,
+    featured: false,
+    hasVR: true,
+    desc: 'Studio nhỏ gọn, tiện nghi, phù hợp người sống một mình hoặc làm việc từ xa. Thiết kế tối giản và gần biển.',
+    amenities: ['Gần biển', 'Full nội thất', 'Internet tốc độ cao', 'Khóa cửa thông minh'],
+    vr: 'https://my.matterport.com/show/?m=WMo88QtrD3A',
+    tags: ['Có VR', 'Giá tốt', 'Phù hợp người độc thân'],
+    image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80'
+    ]
+  },
+  {
+    id: 4,
+    name: 'Căn hộ Green Living Hub',
+    type: 'Căn hộ',
+    areaGroup: 'TP.HCM',
+    location: 'Quận 7, TP.HCM',
+    price: '15 triệu/tháng',
+    priceValue: 15,
+    rooms: 2,
+    area: 72,
+    bathrooms: 2,
+    featured: false,
+    hasVR: true,
+    desc: 'Không gian sống xanh, gần trung tâm thương mại, phù hợp với người làm văn phòng muốn tìm nơi ở tiện nghi.',
+    amenities: ['Khuôn viên xanh', 'Siêu thị gần nhà', 'Khu vui chơi trẻ em', 'Lễ tân 24/7'],
+    vr: 'https://my.matterport.com/show/?m=rX9xYJkbR6X',
+    tags: ['Không gian xanh', 'Căn hộ tiện nghi', 'Gần trung tâm'],
+    image: 'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1560449752-8d1a7b12b8f4?auto=format&fit=crop&w=1200&q=80'
+    ]
+  },
+  {
+    id: 5,
+    name: 'Nhà phố Golden Lane',
+    type: 'Nhà phố',
+    areaGroup: 'Hà Nội',
+    location: 'Cầu Giấy, Hà Nội',
+    price: '5.8 tỷ',
+    priceValue: 5.8,
+    rooms: 4,
+    area: 140,
+    bathrooms: 3,
+    featured: false,
+    hasVR: true,
+    desc: 'Mặt tiền đẹp, khu dân cư đông đúc, phù hợp người mua nhà kết hợp ở và kinh doanh nhỏ.',
+    amenities: ['Mặt tiền rộng', 'Khu dân cư sầm uất', 'Gần văn phòng', 'Thiết kế mở'],
+    vr: 'https://my.matterport.com/show/?m=tBUbpx9R2xC',
+    tags: ['Mua ở lâu dài', 'Vị trí đẹp', 'Mặt tiền lớn'],
+    image: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1600047509358-9dc75507daeb?auto=format&fit=crop&w=1200&q=80'
+    ]
+  },
+  {
+    id: 6,
+    name: 'Studio Smart Compact',
+    type: 'Studio',
+    areaGroup: 'TP.HCM',
+    location: 'Bình Thạnh, TP.HCM',
+    price: '6.8 triệu/tháng',
+    priceValue: 6.8,
+    rooms: 1,
+    area: 32,
+    bathrooms: 1,
+    featured: true,
+    hasVR: true,
+    desc: 'Studio gọn gàng, phù hợp sinh hoạt cá nhân, tối ưu không gian và vị trí gần khu văn phòng.',
+    amenities: ['Gần trung tâm', 'Máy lạnh', 'Nội thất cơ bản', 'Ra vào vân tay'],
+    vr: 'https://my.matterport.com/show/?m=i81gEraWpeJ',
+    tags: ['Giá tốt', 'Gọn gàng', 'Ở một mình'],
+    image: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1505692952047-1a78307da8f2?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80'
+    ]
+  }
+];
 
     let currentPage = 'home';
     let currentProperty = properties[0];
@@ -1541,20 +1566,20 @@ setTimeout(() => {
       `;
       document.getElementById('detailAmenities').innerHTML = property.amenities.map(item => `<div class="amenity">✓ ${item}</div>`).join('');
 
-   const gallery = [
-  property.image,
-  property.image,
-  property.image
-];
+const gallery = property.images && property.images.length
+  ? property.images
+  : [property.image];
 
 const main = document.getElementById('galleryMain');
 const thumbs = document.getElementById('galleryThumbs');
 
-main.innerHTML = `<img src="${gallery[0]}" alt="${property.name}" style="width:100%;height:100%;object-fit:cover;">`;
+main.innerHTML = `
+  <img src="${gallery[0]}" alt="${property.name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">
+`;
 
 thumbs.innerHTML = gallery.map((item, index) => `
   <div class="thumb ${index === 0 ? 'active' : ''}" onclick="setGallery(${index})">
-    <img src="${item}" alt="${property.name}" style="width:100%;height:100%;object-fit:cover;">
+    <img src="${item}" alt="${property.name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">
   </div>
 `).join('');
 
