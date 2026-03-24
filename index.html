@@ -482,7 +482,14 @@
       overflow: hidden;
       background: linear-gradient(160deg, #173153 0%, #101d34 40%, #0c1424 100%);
     }
-
+.property-card:hover .property-cover img {
+  transform: scale(1.05);
+    width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
     .badge-row {
       position: absolute;
       top: 14px;
@@ -1259,8 +1266,8 @@ select option:hover {
         amenities: ['Ban công rộng', 'Bãi đỗ xe', 'Bảo vệ 24/7', 'Gym & hồ bơi'],
         vr: 'https://my.matterport.com/show/?m=J7a8n6r8sHf',
         tags: ['Có VR', 'Nội thất đầy đủ', 'Phù hợp thuê ở'],
-        galleryTheme: 'warm'
-        image: "link_ảnh",
+galleryTheme: 'warm',
+image: "link_ảnh",
       },
       {
         id: 2,
@@ -1279,8 +1286,8 @@ select option:hover {
         amenities: ['Gara ô tô', 'Bếp lớn', 'Gần trường học', 'Khu dân cư an ninh'],
         vr: 'https://my.matterport.com/show/?m=SxQL3iGyoDo',
         tags: ['Có VR', 'Phù hợp mua ở', 'Nhà phố hiện đại'],
-        galleryTheme: 'sunset'
-        image: "link_ảnh",
+galleryTheme: 'warm',
+image: "link_ảnh",
       },
       {
         id: 3,
@@ -1299,8 +1306,8 @@ select option:hover {
         amenities: ['Gần biển', 'Full nội thất', 'Internet tốc độ cao', 'Khóa cửa thông minh'],
         vr: 'https://my.matterport.com/show/?m=2jJk0jW5o3f',
         tags: ['Có VR', 'Giá tốt', 'Phù hợp người độc thân'],
-        galleryTheme: 'coast'
-        image: "link_ảnh",
+galleryTheme: 'warm',
+image: "link_ảnh",
       },
       {
         id: 4,
@@ -1319,8 +1326,8 @@ select option:hover {
         amenities: ['Khuôn viên xanh', 'Siêu thị gần nhà', 'Khu vui chơi trẻ em', 'Lễ tân 24/7'],
         vr: 'https://my.matterport.com/show/?m=J7a8n6r8sHf',
         tags: ['Không gian xanh', 'Căn hộ tiện nghi', 'Gần trung tâm'],
-        galleryTheme: 'forest'
-        image: "link_ảnh",
+     galleryTheme: 'warm',
+image: "link_ảnh",
       },
       {
         id: 5,
@@ -1339,8 +1346,8 @@ select option:hover {
         amenities: ['Mặt tiền rộng', 'Khu dân cư sầm uất', 'Gần văn phòng', 'Thiết kế mở'],
         vr: 'https://my.matterport.com/show/?m=SxQL3iGyoDo',
         tags: ['Mua ở lâu dài', 'Vị trí đẹp', 'Mặt tiền lớn'],
-        galleryTheme: 'gold'
-        image: "link_ảnh",
+      galleryTheme: 'warm',
+image: "link_ảnh",
       },
       {
         id: 6,
@@ -1359,8 +1366,8 @@ select option:hover {
         amenities: ['Gần trung tâm', 'Máy lạnh', 'Nội thất cơ bản', 'Ra vào vân tay'],
         vr: 'https://my.matterport.com/show/?m=2jJk0jW5o3f',
         tags: ['Giá tốt', 'Gọn gàng', 'Ở một mình'],
-        galleryTheme: 'night'
-        image: "link_ảnh",
+galleryTheme: 'warm',
+image: "link_ảnh",
       }
     ];
 
@@ -1432,13 +1439,13 @@ select option:hover {
     function propertyCardHTML(property) {
       return `
         <article class="property-card">
-          <div class="property-cover">
-            <div class="badge-row">
-              <div class="badge">${property.featured ? '⭐ Nổi bật' : '🏠 Gợi ý'}</div>
-              <div class="badge">${formatBadge(property)}</div>
-            </div>
-            <img src="${property.image}" style="width:100%; height:100%; object-fit:cover;">
-          </div>
+<div class="property-cover">
+  <div class="badge-row">
+    <div class="badge">${property.featured ? '⭐ Nổi bật' : '🏠 Gợi ý'}</div>
+    <div class="badge">${formatBadge(property)}</div>
+  </div>
+  <img src="${property.image}" alt="${property.name}">
+</div>
           <div class="property-content">
             <div class="property-top">
               <div>
@@ -1463,12 +1470,26 @@ select option:hover {
     }
 
     function matchesPrice(property, level) {
-      if (level === 'all') return true;
-      if (level === 'low') return property.priceValue < 8 || property.priceValue < 30;
-      if (level === 'mid') return (property.priceValue >= 8 && property.priceValue <= 15) || (property.priceValue >= 30 && property.priceValue <= 50);
-      if (level === 'high') return property.priceValue > 15 || property.priceValue > 50;
-      return true;
-    }
+  if (level === 'all') return true;
+
+  const isRent = property.price.includes('triệu/tháng');
+  const isBuy = property.price.includes('tỷ');
+
+  if (level === 'low') {
+    return (isRent && property.priceValue < 8) || (isBuy && property.priceValue < 3);
+  }
+
+  if (level === 'mid') {
+    return (isRent && property.priceValue >= 8 && property.priceValue <= 15) ||
+           (isBuy && property.priceValue >= 3 && property.priceValue <= 5);
+  }
+
+  if (level === 'high') {
+    return (isRent && property.priceValue > 15) || (isBuy && property.priceValue > 5);
+  }
+
+  return true;
+}
 
     function renderProperties() {
       const keyword = document.getElementById('searchInput')?.value?.trim().toLowerCase() || '';
@@ -1514,27 +1535,36 @@ select option:hover {
       `;
       document.getElementById('detailAmenities').innerHTML = property.amenities.map(item => `<div class="amenity">✓ ${item}</div>`).join('');
 
-      const gallery = createGalleryVariants(property);
-      const main = document.getElementById('galleryMain');
-      const thumbs = document.getElementById('galleryThumbs');
-      main.innerHTML = gallery[0].html;
-      thumbs.innerHTML = gallery.map((item, index) => `
-        <div class="thumb ${index === 0 ? 'active' : ''}" onclick="setGallery(${index})">
-          <div style="height:100%; position:relative">${item.html}</div>
-        </div>
-      `).join('');
+   const gallery = [
+  property.image,
+  property.image,
+  property.image
+];
 
-      window.__currentGallery = gallery;
+const main = document.getElementById('galleryMain');
+const thumbs = document.getElementById('galleryThumbs');
+
+main.innerHTML = `<img src="${gallery[0]}" alt="${property.name}" style="width:100%;height:100%;object-fit:cover;">`;
+
+thumbs.innerHTML = gallery.map((item, index) => `
+  <div class="thumb ${index === 0 ? 'active' : ''}" onclick="setGallery(${index})">
+    <img src="${item}" alt="${property.name}" style="width:100%;height:100%;object-fit:cover;">
+  </div>
+`).join('');
+
+window.__currentGallery = gallery;
     }
 
     function setGallery(index) {
-      currentGalleryIndex = index;
-      const gallery = window.__currentGallery || createGalleryVariants(currentProperty);
-      document.getElementById('galleryMain').innerHTML = gallery[index].html;
-      document.querySelectorAll('.thumb').forEach((thumb, i) => {
-        thumb.classList.toggle('active', i === index);
-      });
-    }
+  currentGalleryIndex = index;
+  const gallery = window.__currentGallery || [currentProperty.image];
+  document.getElementById('galleryMain').innerHTML = `
+    <img src="${gallery[index]}" alt="${currentProperty.name}" style="width:100%;height:100%;object-fit:cover;">
+  `;
+  document.querySelectorAll('.thumb').forEach((thumb, i) => {
+    thumb.classList.toggle('active', i === index);
+  });
+}
 
     function fillHouseSelect() {
       const select = document.getElementById('selectedHouse');
