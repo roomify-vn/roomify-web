@@ -970,7 +970,7 @@ backdrop-filter: blur(10px);
 .house3d-base {
   position: absolute;
   left: 20px;
-  top: 58px;
+  top: 60px;
   width: 100px;
   height: 74px;
   transform-style: preserve-3d;
@@ -1056,56 +1056,58 @@ backdrop-filter: blur(10px);
 .win-left { left: 14px; }
 .win-right { right: 14px; }
 
-.roof3d {
+..roof3d {
   position: absolute;
-  width: 84px;
-  height: 84px;
-  top: 20px;
-  background: linear-gradient(180deg, #a66b30, #6c411d);
+  top: 18px;
+  width: 78px;
+  height: 62px;
+  background: linear-gradient(180deg, #a86c31, #6a401d);
   border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 8px 14px rgba(0,0,0,.18);
 }
 
 .roof-front {
-  left: 28px;
-  transform-origin: bottom center;
-  transform: rotateX(62deg) rotateZ(45deg) translateZ(2px);
+  left: 30px;
+  transform-origin: bottom right;
+  transform: rotateY(-90deg) rotateX(32deg) translateZ(30px);
 }
 
 .roof-back {
-  left: 28px;
-  transform-origin: bottom center;
-  transform: rotateX(62deg) rotateZ(45deg) translateZ(-22px);
+  right: 30px;
+  transform-origin: bottom left;
+  transform: rotateY(90deg) rotateX(32deg) translateZ(30px);
   filter: brightness(.9);
 }
 
 .roof-side {
   position: absolute;
-  top: 40px;
-  width: 38px;
-  height: 52px;
-  background: linear-gradient(180deg, #7e4d24, #5d371a);
+  width: 62px;
+  height: 34px;
+  background: linear-gradient(180deg, #7f4d24, #5a3518);
   clip-path: polygon(50% 0, 100% 100%, 0 100%);
 }
 
 .roof-left {
   left: 19px;
-  transform: rotateY(-90deg) rotateZ(0deg) translateZ(30px);
+  top: 26px;
+  transform: rotateX(32deg) translateZ(30px);
 }
 
 .roof-right {
   right: 19px;
-  transform: rotateY(90deg) rotateZ(0deg) translateZ(30px);
+  top: 26px;
+  transform: rotateX(32deg) translateZ(30px) rotateY(180deg);
 }
 
 .chimney3d {
   position: absolute;
-  right: 34px;
-  top: 22px;
+  right: 38px;
+  top: 24px;
   width: 12px;
-  height: 32px;
+  height: 28px;
   background: linear-gradient(180deg, #d8dde7, #96a0b2);
   border-radius: 4px;
-  transform: translateZ(10px);
+  transform: translateZ(18px);
 }
 
 .shadow3d {
@@ -1128,17 +1130,13 @@ backdrop-filter: blur(10px);
   }
 }
 
-
-
 @media (max-width: 1100px) {
   .house-hero {
     min-height: 500px;
   }
-  
 
-  .house-model {
-    top: 44%;
-    transform: translate(-50%, -50%) rotateX(-10deg) rotateY(-22deg);
+  .house3d-wrap {
+    transform: scale(.92);
   }
 }
 
@@ -1149,18 +1147,13 @@ backdrop-filter: blur(10px);
   }
 
   .house-rotate-wrap {
-    width: 250px;
-    height: 210px;
+    width: 240px;
+    height: 220px;
     top: 50%;
   }
 
-  .house-model {
-    transform: rotateX(-18deg) rotateY(-18deg) scale(.82);
-  }
-
-  .house-floor {
-    width: 180px;
-    height: 180px;
+  .house3d-wrap {
+    transform: scale(.78);
   }
 }
     @media (max-width: 1100px) {
