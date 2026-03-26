@@ -93,12 +93,18 @@
     }
     .btn-block { width: 100%; }
 
-  header {
+header {
   position: sticky;
   top: 0;
   z-index: 50;
   background: rgba(6,16,29,0.92);
   border-bottom: 1px solid rgba(255,255,255,0.08);
+  transition: transform 0.35s ease, opacity 0.35s ease;
+  will-change: transform;
+}
+
+header.header-hidden {
+  transform: translateY(-100%);
 }
 
     .header-wrap {
@@ -1925,6 +1931,26 @@ window.__currentGallery = gallery;
       const houseName = properties.find(p => String(p.id) === houseId)?.name || 'căn nhà bạn quan tâm';
       showToast(`Đã ghi nhận yêu cầu đặt lịch xem ${houseName}. Đây là demo frontend nên dữ liệu chưa được lưu vào server.`);
       this.reset();
+      let lastScrollY = window.scrollY;
+const header = document.querySelector('header');
+
+window.addEventListener('scroll', () => {
+  const currentScrollY = window.scrollY;
+
+  if (currentScrollY <= 10) {
+    header.classList.remove('header-hidden');
+    lastScrollY = currentScrollY;
+    return;
+  }
+
+  if (currentScrollY > lastScrollY && currentScrollY > 80) {
+    header.classList.add('header-hidden');   // lướt xuống -> ẩn
+  } else {
+    header.classList.remove('header-hidden'); // lướt lên -> hiện
+  }
+
+  lastScrollY = currentScrollY;
+});
       fillHouseSelect();
     });
 
