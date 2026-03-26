@@ -154,7 +154,7 @@ header.header-hidden {
   color: var(--muted);
   font-size: 14px;
   margin-top: 4px;
-}}
+}
 
     .nav {
       display: flex;
@@ -1931,7 +1931,15 @@ window.__currentGallery = gallery;
       const houseName = properties.find(p => String(p.id) === houseId)?.name || 'căn nhà bạn quan tâm';
       showToast(`Đã ghi nhận yêu cầu đặt lịch xem ${houseName}. Đây là demo frontend nên dữ liệu chưa được lưu vào server.`);
       this.reset();
-      let lastScrollY = window.scrollY;
+   
+      fillHouseSelect();
+    });
+
+    document.getElementById('searchInput')?.addEventListener('input', renderProperties);
+    document.getElementById('typeFilter')?.addEventListener('change', renderProperties);
+    document.getElementById('areaFilter')?.addEventListener('change', renderProperties);
+    document.getElementById('priceFilter')?.addEventListener('change', renderProperties);
+let lastScrollY = window.scrollY;
 const header = document.querySelector('header');
 
 window.addEventListener('scroll', () => {
@@ -1944,21 +1952,13 @@ window.addEventListener('scroll', () => {
   }
 
   if (currentScrollY > lastScrollY && currentScrollY > 80) {
-    header.classList.add('header-hidden');   // lướt xuống -> ẩn
+    header.classList.add('header-hidden');
   } else {
-    header.classList.remove('header-hidden'); // lướt lên -> hiện
+    header.classList.remove('header-hidden');
   }
 
   lastScrollY = currentScrollY;
 });
-      fillHouseSelect();
-    });
-
-    document.getElementById('searchInput')?.addEventListener('input', renderProperties);
-    document.getElementById('typeFilter')?.addEventListener('change', renderProperties);
-    document.getElementById('areaFilter')?.addEventListener('change', renderProperties);
-    document.getElementById('priceFilter')?.addEventListener('change', renderProperties);
-
     fillHouseSelect();
     navigate('home');
   </script>
