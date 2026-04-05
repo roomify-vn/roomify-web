@@ -479,14 +479,15 @@ color: #f7c56a;
       gap: 18px;
     }
 
-    .property-card {
-      overflow: hidden;
-      border-radius: 28px;
-      border: 1px solid rgba(255,255,255,.08);
-      background: rgba(255,255,255,.05);
-      transition: .28s ease;
-      box-shadow: var(--shadow);
-    }
+ .property-card {
+  overflow: hidden;
+  border-radius: 28px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.05);
+  transition: .28s ease;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
 
     .property-card:hover { transform: translateY(-3px); }
 
@@ -2786,37 +2787,47 @@ function backToProperties() {
       ];
     }
 
-    function propertyCardHTML(property) {
-      return `
-        <article class="property-card">
-<div class="property-cover">
-  <div class="badge-row">
-    <div class="badge">${property.featured ? '⭐ Nổi bật' : '🏠 Gợi ý'}</div>
-    <div class="badge">${formatBadge(property)}</div>
-  </div>
-<img src="${property.image}" alt="${property.name}">
-</div>
-          <div class="property-content">
-            <div class="property-top">
-              <div>
-                <h3 class="property-title">${property.name}</h3>
-                <div class="property-location">📍 ${property.location}</div>
-              </div>
-              <div class="price">${property.price}</div>
-            </div>
-            <p class="property-desc">${property.desc}</p>
-            <div class="property-meta">
-              <div class="meta-item"><strong>${property.area}m²</strong><span>Diện tích</span></div>
-              <div class="meta-item"><strong>${property.rooms} phòng</strong><span>Phòng ngủ</span></div>
-              <div class="meta-item"><strong>${property.bathrooms} WC</strong><span>Phòng tắm</span></div>
-            </div>
-            <div class="property-actions">
-      <button class="btn btn-primary" onclick="openProperty(${property.id})">Xem chi tiết</button>
-            </div>
+   function propertyCardHTML(property) {
+  return `
+    <article
+      class="property-card"
+      onclick="openProperty(${property.id})"
+      tabindex="0"
+      role="button"
+      onkeydown="if(event.key==='Enter' || event.key===' '){ event.preventDefault(); openProperty(${property.id}); }"
+    >
+      <div class="property-cover">
+        <div class="badge-row">
+          <div class="badge">${property.featured ? '⭐ Nổi bật' : '🏠 Gợi ý'}</div>
+          <div class="badge">${formatBadge(property)}</div>
+        </div>
+        <img src="${property.image}" alt="${property.name}">
+      </div>
+
+      <div class="property-content">
+        <div class="property-top">
+          <div>
+            <h3 class="property-title">${property.name}</h3>
+            <div class="property-location">📍 ${property.location}</div>
           </div>
-        </article>
-      `;
-    }
+          <div class="price">${property.price}</div>
+        </div>
+
+        <p class="property-desc">${property.desc}</p>
+
+        <div class="property-meta">
+          <div class="meta-item"><strong>${property.area}m²</strong><span>Diện tích</span></div>
+          <div class="meta-item"><strong>${property.rooms} phòng</strong><span>Phòng ngủ</span></div>
+          <div class="meta-item"><strong>${property.bathrooms} WC</strong><span>Phòng tắm</span></div>
+        </div>
+
+        <div class="property-actions">
+          <button class="btn btn-primary" type="button">Xem chi tiết</button>
+        </div>
+      </div>
+    </article>
+  `;
+}
 let quickDemoIndex = 0;
 let quickDemoTimer = null;
 
