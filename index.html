@@ -1878,7 +1878,7 @@ select option:hover {
   <h3>Tìm kiếm & lọc</h3>
   <p>Lọc theo nhu cầu như loại nhà, khu vực, mức giá và từ khóa để tìm căn phù hợp nhanh hơn.</p>
 </div>
-<div class="feature-card" onclick="navigate('properties')" style="cursor:pointer">
+<div class="feature-card" onclick="openNextFeatureDetail()" style="cursor:pointer">
   <div class="icon-box">📍</div>
   <h3>Chi tiết rõ ràng</h3>
   <p>Hiển thị diện tích, số phòng, vị trí, tiện ích và mô tả để người dùng có đủ thông tin ra quyết định.</p>
@@ -2663,6 +2663,7 @@ select option:hover {
 let currentPage = 'home';
 let currentProperty = properties[0];
 let currentGalleryIndex = 0;
+let featureDetailIndex = -1;
 
 let propertyListState = {
   keyword: '',
@@ -2917,7 +2918,14 @@ function openQuickDemo(id) {
   stopQuickDemoAutoplay();
   navigate('detail', id);
 }
+function openNextFeatureDetail() {
+  const candidates = properties.filter(p => p.hasVR);
 
+  if (!candidates.length) return;
+
+  featureDetailIndex = (featureDetailIndex + 1) % candidates.length;
+  navigate('detail', candidates[featureDetailIndex].id);
+}
 window.addEventListener('resize', () => {
   clearTimeout(window.__quickDemoResize);
   window.__quickDemoResize = setTimeout(updateQuickDemo, 120);
