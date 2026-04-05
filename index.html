@@ -927,7 +927,19 @@ select option:hover {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+.property-content{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
 
+.property-desc{
+  min-height: 88px;
+}
+
+.property-meta{
+  margin: 14px 0 16px;
+}
 .property-actions {
   margin-top: auto;
   display: flex;
@@ -936,6 +948,14 @@ select option:hover {
 
 .property-actions .btn {
   min-height: 46px;
+}
+
+.property-actions.single-action .btn{
+  width: 100%;
+  max-width: 100%;
+  font-size: 17px;
+  padding: 16px 20px;
+  border-radius: 18px;
 }
 /* ===== HẾT ===== */
 /* ===== HERO HOUSE ANIMATION ===== */
@@ -2792,7 +2812,6 @@ function backToProperties() {
             </div>
             <div class="property-actions">
       <button class="btn btn-primary" onclick="openProperty(${property.id})">Xem chi tiết</button>
-             <button class="btn btn-secondary" onclick="quickBook(${property.id})">Tải app</button>
             </div>
           </div>
         </article>
