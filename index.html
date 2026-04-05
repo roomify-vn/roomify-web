@@ -1463,7 +1463,41 @@ select option:hover {
     font-size: 16px;
   }
 }
+.floating-back-btn{
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  width: 54px;
+  height: 54px;
+  border: 1px solid rgba(247,197,106,.30);
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffd992, #f2b142 60%, #d4871f);
+  color: #1e1200;
+  font-size: 26px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 12px 28px rgba(242,177,66,.28);
+  z-index: 999;
+  transition: .25s ease;
+}
 
+.floating-back-btn:hover{
+  transform: translateY(-2px) scale(1.03);
+}
+
+.floating-back-btn.hidden{
+  display: none;
+}
+
+@media (max-width: 820px){
+  .floating-back-btn{
+    right: 14px;
+    bottom: 14px;
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+  }
+}
 /* DÁN BLOCK VIỀN VÀNG Ở ĐÂY */
 .glass,
 .stat-card,
@@ -1606,7 +1640,6 @@ select option:hover {
 }
 
 </style>
-  </style>
 </head>
 <body>
   <header>
@@ -1879,7 +1912,7 @@ select option:hover {
               <textarea id="message" placeholder="Ghi chú thêm: nhu cầu thuê / mua, khu vực ưu tiên, số người ở...">Tôi muốn được tư vấn thêm về căn nhà này.</textarea>
             </div>
             <button class="btn btn-primary btn-block" type="submit" style="margin-top:14px">Gửi yêu cầu đặt lịch</button>
-      </div>
+    
           </form>
         </div>
       </div>
@@ -2952,6 +2985,7 @@ function navigate(page, propertyId = null, options = {}) {
   }
 
   updateNav(page);
+  updateFloatingBackButton(page);
 if (page === 'home') {
   startQuickDemoAutoplay();
 } else {
@@ -2986,7 +3020,21 @@ if (page === 'home') {
         a.classList.toggle('active', a.dataset.page === page);
       });
     }
+function updateFloatingBackButton(page) {
+  const btn = document.getElementById('floatingBackBtn');
+  if (!btn) return;
 
+  btn.classList.toggle('hidden', page === 'home');
+}
+
+function smartBack() {
+  if (currentPage === 'detail') {
+    backToProperties();
+    return;
+  }
+
+  navigate('home');
+}
     function scrollToSection(id) {
       navigate('home');
       setTimeout(() => {
@@ -3085,5 +3133,8 @@ fillHouseSelect();
 history.replaceState({ page: 'home' }, '', '#home');
 navigate('home', null, { skipScroll: true, pushHistory: false });
   </script>
+  <button id="floatingBackBtn" class="floating-back-btn hidden" onclick="smartBack()" aria-label="Quay lại">
+  ←
+</button>
 </body>
 </html>
