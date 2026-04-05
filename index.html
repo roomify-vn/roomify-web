@@ -1262,7 +1262,7 @@ select option:hover {
   <header>
     <div class="container">
       <div class="header-wrap">
-        <a href="#home" class="brand" onclick="navigate('home')">
+      <a href="#" class="brand" onclick="navigate('home'); return false;">
        <div class="brand-logo">
 <img src="logo-roomify-big-removebg-preview.png" alt="Roomify logo">
 </div>
@@ -1272,26 +1272,26 @@ select option:hover {
           </div>
         </a>
 
-        <nav class="nav" id="desktopNav">
-          <a href="#home" data-page="home" class="active" onclick="navigate('home')">Trang chủ</a>
-          <a href="#features" data-page="features" onclick="scrollToSection('features')">Tính năng</a>
-          <a href="#properties" data-page="properties" onclick="navigate('properties')">Danh sách nhà</a>
-          <a href="#detail" data-page="detail" onclick="navigate('detail', 0)">Chi tiết</a>
-          <a href="#contact" data-page="contact" onclick="navigate('contact')">Đặt lịch</a>
-        </nav>
+   <nav class="nav" id="desktopNav">
+  <a href="#" data-page="home" class="active" onclick="navigate('home'); return false;">Trang chủ</a>
+  <a href="#" data-page="features" onclick="scrollToSection('features'); return false;">Tính năng</a>
+  <a href="#" data-page="properties" onclick="navigate('properties'); return false;">Danh sách nhà</a>
+  <a href="#" data-page="detail" onclick="navigate('detail', currentProperty?.id || 1); return false;">Chi tiết</a>
+  <a href="#" data-page="contact" onclick="navigate('contact'); return false;">Đặt lịch</a>
+</nav>
 
         <button class="menu-btn" onclick="toggleMobileMenu()" aria-label="Mở menu">
           ☰
         </button>
       </div>
 
-      <div class="mobile-menu" id="mobileMenu">
-        <a href="#home" onclick="navigate('home'); toggleMobileMenu(false)">Trang chủ</a>
-        <a href="#features" onclick="scrollToSection('features'); toggleMobileMenu(false)">Tính năng</a>
-        <a href="#properties" onclick="navigate('properties'); toggleMobileMenu(false)">Danh sách nhà</a>
-        <a href="#detail" onclick="navigate('detail', 0); toggleMobileMenu(false)">Chi tiết</a>
-        <a href="#contact" onclick="navigate('contact'); toggleMobileMenu(false)">Đặt lịch</a>
-      </div>
+ <div class="mobile-menu" id="mobileMenu">
+  <a href="#" onclick="navigate('home'); toggleMobileMenu(false); return false;">Trang chủ</a>
+  <a href="#" onclick="scrollToSection('features'); toggleMobileMenu(false); return false;">Tính năng</a>
+  <a href="#" onclick="navigate('properties'); toggleMobileMenu(false); return false;">Danh sách nhà</a>
+  <a href="#" onclick="navigate('detail', currentProperty?.id || 1); toggleMobileMenu(false); return false;">Chi tiết</a>
+  <a href="#" onclick="navigate('contact'); toggleMobileMenu(false); return false;">Đặt lịch</a>
+</div>
     </div>
   </header>
 
