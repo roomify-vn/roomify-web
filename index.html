@@ -1457,7 +1457,7 @@ select option:hover {
 
           <div class="hero-actions" style="margin-top:20px">
             <button class="btn btn-primary" onclick="prefillContactFromDetail()">Đặt lịch xem căn này</button>
-            <button class="btn btn-secondary" onclick="navigate('properties')">Quay lại danh sách</button>
+      <button class="btn btn-secondary" onclick="backToProperties()">Quay lại danh sách</button>
           </div>
         </div>
       </div>
@@ -2162,9 +2162,72 @@ select option:hover {
   }
 ];
 
-    let currentPage = 'home';
-    let currentProperty = properties[0];
-    let currentGalleryIndex = 0;
+let currentPage = 'home';
+let currentProperty = properties[0];
+let currentGalleryIndex = 0;
+
+let propertyListState = {
+  keyword: '',
+  type: 'all',
+  area: 'all',
+  price: 'all',
+  scrollY: 0
+};
+
+let lastDetailFromProperties = false;
+
+function getPropertyListState() {
+  return {
+    keyword: document.getElementById('searchInput')?.value || '',
+    type: document.getElementById('typeFilter')?.value || 'all',
+    area: document.getElementById('areaFilter')?.value || 'all',
+    price: document.getElementById('priceFilter')?.value || 'all',
+    scrollY: window.scrollY || window.pageYOffset || 0
+  };
+}
+
+function applyPropertyListState(state = propertyListState) {
+  const searchInput = document.getElementById('searchInput');
+  const typeFilter = document.getElementById('typeFilter');
+  const areaFilter = document.getElementById('areaFilter');
+  const priceFilter = document.getElementById('priceFilter');
+
+  if (searchInput) searchInput.value = state.keyword || '';
+  if (typeFilter) typeFilter.value = state.type || 'all';
+  if (areaFilter) areaFilter.value = state.area || 'all';
+  if (priceFilter) priceFilter.value = state.price || 'all';
+}
+
+function savePropertyListState() {
+  propertyListState = getPropertyListState();
+  history.replaceState(
+    { page: 'properties', propertyListState },
+    '',
+    '#properties'
+  );
+}
+
+function openProperty(id) {
+  lastDetailFromProperties = true;
+  savePropertyListState();
+  navigate('detail', id);
+}
+
+function backToProperties() {
+  if (lastDetailFromProperties) {
+    history.back();
+    return;
+  }
+
+  applyPropertyListState(propertyListState);
+  navigate('properties', null, { skipScroll: true });
+  setTimeout(() => {
+    window.scrollTo({
+      top: propertyListState.scrollY || 0,
+      behavior: 'auto'
+    });
+  }, 30);
+}
 
     function formatBadge(property) {
       return property.hasVR ? 'Có VR' : 'Ảnh minh họa';
@@ -2252,7 +2315,7 @@ select option:hover {
               <div class="meta-item"><strong>${property.bathrooms} WC</strong><span>Phòng tắm</span></div>
             </div>
             <div class="property-actions">
-              <button class="btn btn-primary" onclick="navigate('detail', ${property.id})">Xem chi tiết</button>
+      <button class="btn btn-primary" onclick="openProperty(${property.id})">Xem chi tiết</button>
               <button class="btn btn-secondary" onclick="quickBook(${property.id})">Đặt lịch</button>
             </div>
           </div>
@@ -2283,29 +2346,44 @@ select option:hover {
 }
 
     function renderProperties() {
-      const keyword = document.getElementById('searchInput')?.value?.trim().toLowerCase() || '';
-      const type = document.getElementById('typeFilter')?.value || 'all';
-      const area = document.getElementById('areaFilter')?.value || 'all';
-      const price = document.getElementById('priceFilter')?.value || 'all';
+  const keywordValue = document.getElementById('searchInput')?.value || '';
+  const keyword = keywordValue.trim().toLowerCase();
+  const type = document.getElementById('typeFilter')?.value || 'all';
+  const area = document.getElementById('areaFilter')?.value || 'all';
+  const price = document.getElementById('priceFilter')?.value || 'all';
+if (currentPage === 'properties' && history.state?.page === 'properties') {
+  propertyListState = {
+    keyword: keywordValue,
+    type,
+    area,
+    price,
+    scrollY: window.scrollY || window.pageYOffset || 0
+  };
 
-      const filtered = properties.filter(p => {
-        const matchKeyword = !keyword || [p.name, p.location, p.desc, p.type].join(' ').toLowerCase().includes(keyword);
-        const matchType = type === 'all' || p.type === type;
-        const matchArea = area === 'all' || p.areaGroup === area;
-        const matchPrice = matchesPrice(p, price);
-        return matchKeyword && matchType && matchArea && matchPrice;
-      });
+  history.replaceState(
+    { page: 'properties', propertyListState },
+    '',
+    '#properties'
+  );
+}
+  const filtered = properties.filter(p => {
+    const matchKeyword = !keyword || [p.name, p.location, p.desc, p.type].join(' ').toLowerCase().includes(keyword);
+    const matchType = type === 'all' || p.type === type;
+    const matchArea = area === 'all' || p.areaGroup === area;
+    const matchPrice = matchesPrice(p, price);
+    return matchKeyword && matchType && matchArea && matchPrice;
+  });
 
-      const grid = document.getElementById('propertyGrid');
-      if (!grid) return;
+  const grid = document.getElementById('propertyGrid');
+  if (!grid) return;
 
-      if (!filtered.length) {
-        grid.innerHTML = `<div class="empty" style="grid-column:1/-1">Không tìm thấy căn nhà phù hợp. Hãy thử đổi bộ lọc hoặc từ khóa tìm kiếm.</div>`;
-        return;
-      }
+  if (!filtered.length) {
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1">Không tìm thấy căn nhà phù hợp. Hãy thử đổi bộ lọc hoặc từ khóa tìm kiếm.</div>`;
+    return;
+  }
 
-      grid.innerHTML = filtered.map(propertyCardHTML).join('');
-    }
+  grid.innerHTML = filtered.map(propertyCardHTML).join('');
+}
 
     function renderDetail(propertyId) {
       const property = properties.find(p => p.id === Number(propertyId)) || properties[0];
@@ -2393,16 +2471,56 @@ window.__currentGallery = gallery;
       window.__toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
     }
 
-    function navigate(page, propertyId = null) {
-      currentPage = page;
-      document.querySelectorAll('.page').forEach(section => section.classList.add('hidden-page'));
-      const target = document.getElementById(`page-${page}`);
-      if (target) target.classList.remove('hidden-page');
-      if (page === 'properties') renderProperties();
-      if (page === 'detail') renderDetail(propertyId || currentProperty?.id || 1);
-      updateNav(page);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+function navigate(page, propertyId = null, options = {}) {
+  const { skipScroll = false, pushHistory = true } = options;
+
+  currentPage = page;
+
+  document.querySelectorAll('.page').forEach(section => {
+    section.classList.add('hidden-page');
+  });
+
+  const target = document.getElementById(`page-${page}`);
+  if (target) target.classList.remove('hidden-page');
+
+  if (page === 'properties') {
+    applyPropertyListState(propertyListState);
+    renderProperties();
+  }
+
+  if (page === 'detail') {
+    renderDetail(propertyId || currentProperty?.id || 1);
+  }
+
+  if (page !== 'detail') {
+    lastDetailFromProperties = false;
+  }
+
+  updateNav(page);
+
+  if (pushHistory) {
+    let state;
+    let hash;
+
+    if (page === 'properties') {
+      state = { page: 'properties', propertyListState };
+      hash = '#properties';
+    } else if (page === 'detail') {
+      const id = propertyId || currentProperty?.id || 1;
+      state = { page: 'detail', propertyId: id };
+      hash = `#detail-${id}`;
+    } else {
+      state = { page };
+      hash = `#${page}`;
     }
+
+    history.pushState(state, '', hash);
+  }
+
+  if (!skipScroll) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
 
     function updateNav(page) {
       document.querySelectorAll('#desktopNav a').forEach(a => {
@@ -2471,8 +2589,41 @@ window.addEventListener('scroll', () => {
 
   lastScrollY = currentScrollY;
 });
+    window.addEventListener('popstate', (e) => {
+  const state = e.state;
+
+  if (!state) {
+    navigate('home', null, { skipScroll: true, pushHistory: false });
+    return;
+  }
+
+  if (state.page === 'properties') {
+    propertyListState = state.propertyListState || propertyListState;
+    applyPropertyListState(propertyListState);
+
+    navigate('properties', null, {
+      skipScroll: true,
+      pushHistory: false
+    });
+
+    setTimeout(() => {
+      window.scrollTo({
+        top: propertyListState.scrollY || 0,
+        behavior: 'auto'
+      });
+    }, 30);
+
+    return;
+  }
+
+  navigate(state.page || 'home', state.propertyId, {
+    skipScroll: true,
+    pushHistory: false
+  });
+});
     fillHouseSelect();
-    navigate('home');
+history.replaceState({ page: 'home' }, '', '#home');
+navigate('home', null, { skipScroll: true, pushHistory: false });
   </script>
 </body>
 </html>
