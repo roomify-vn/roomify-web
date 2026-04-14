@@ -862,6 +862,7 @@ select option:hover {
 /* FIX HEADER CHE NỘI DUNG */
 #page-properties,
 #page-detail,
+#page-booking,
 #page-contact {
   padding-top: 100px;
 }
@@ -1766,13 +1767,13 @@ select option:hover {
             <div class="brand-sub">See in VR. Price in minutes.</div>
           </div>
         </a>
-
-   <nav class="nav" id="desktopNav">
+<nav class="nav" id="desktopNav">
   <a href="#" data-page="home" class="active" onclick="navigate('home'); return false;">Trang chủ</a>
   <a href="#" data-page="features" onclick="scrollToSection('features'); return false;">Tính năng</a>
   <a href="#" data-page="properties" onclick="navigate('properties'); return false;">Danh sách nhà</a>
   <a href="#" data-page="detail" onclick="navigate('detail', currentProperty?.id || 1); return false;">Chi tiết</a>
-<a href="#" data-page="contact" onclick="navigate('contact'); return false;">Tải app</a>
+  <a href="#" data-page="booking" onclick="openBooking(); return false;">Đặt lịch</a>
+  <a href="#" data-page="contact" onclick="navigate('contact'); return false;">Tải app</a>
 </nav>
 
         <button class="menu-btn" onclick="toggleMobileMenu()" aria-label="Mở menu">
@@ -1780,12 +1781,13 @@ select option:hover {
         </button>
       </div>
 
- <div class="mobile-menu" id="mobileMenu">
+<div class="mobile-menu" id="mobileMenu">
   <a href="#" onclick="navigate('home'); toggleMobileMenu(false); return false;">Trang chủ</a>
   <a href="#" onclick="scrollToSection('features'); toggleMobileMenu(false); return false;">Tính năng</a>
   <a href="#" onclick="navigate('properties'); toggleMobileMenu(false); return false;">Danh sách nhà</a>
   <a href="#" onclick="navigate('detail', currentProperty?.id || 1); toggleMobileMenu(false); return false;">Chi tiết</a>
-<a href="#" onclick="navigate('contact'); toggleMobileMenu(false); return false;">Tải app</a>
+  <a href="#" onclick="openBooking(); toggleMobileMenu(false); return false;">Đặt lịch</a>
+  <a href="#" onclick="navigate('contact'); toggleMobileMenu(false); return false;">Tải app</a>
 </div>
     </div>
   </header>
@@ -1964,14 +1966,90 @@ select option:hover {
           <h3 style="margin-top:20px">Tiện ích nổi bật</h3>
           <div class="amenities" id="detailAmenities"></div>
 
-          <div class="hero-actions" style="margin-top:20px">
-          <button class="btn btn-primary" onclick="navigate('contact')">Tải app để xem VR</button>
-      <button class="btn btn-secondary" onclick="backToProperties()">Quay lại danh sách</button>
-          </div>
+      <div class="hero-actions" style="margin-top:20px">
+  <button class="btn btn-primary" onclick="prefillContactFromDetail()">Đặt lịch xem nhà</button>
+  <button class="btn btn-secondary" onclick="navigate('contact')">Tải app để xem VR</button>
+  <button class="btn btn-secondary" onclick="backToProperties()">Quay lại danh sách</button>
+</div>
         </div>
       </div>
     </section>
+<section id="page-booking" class="page hidden-page section">
+  <div class="container contact-grid">
+    <div class="contact-card glass">
+      <div class="chip">Liên hệ / đặt lịch</div>
+      <h2 class="download-title">Đăng ký tư vấn xem nhà</h2>
 
+      <p class="property-desc">
+        Điền thông tin để Roomify liên hệ tư vấn hoặc sắp xếp lịch xem nhà phù hợp với bạn.
+        Bạn có thể chọn căn nhà đang quan tâm, ngày và khung giờ mong muốn.
+      </p>
+
+      <div class="info-list">
+        <div class="info-item">
+          <strong>📞 Tư vấn nhanh</strong>
+          <span>Đội ngũ Roomify sẽ liên hệ lại để hỗ trợ thông tin căn nhà phù hợp.</span>
+        </div>
+        <div class="info-item">
+          <strong>🏠 Chọn đúng căn nhà quan tâm</strong>
+          <span>Khách có thể chọn căn muốn xem để quá trình tư vấn chính xác hơn.</span>
+        </div>
+        <div class="info-item">
+          <strong>🗓 Đăng ký lịch xem thuận tiện</strong>
+          <span>Người dùng chọn ngày và giờ mong muốn để được hỗ trợ sắp xếp nhanh hơn.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card glass">
+      <div class="chip">Form khách hàng</div>
+      <h2 style="margin:16px 0 14px">Để lại thông tin của bạn</h2>
+
+      <form id="contactForm">
+        <div class="form-grid">
+          <div class="field">
+            <input id="fullName" type="text" placeholder="Họ và tên" required>
+          </div>
+          <div class="field">
+            <input id="phone" type="tel" placeholder="Số điện thoại" required>
+          </div>
+        </div>
+
+        <div class="form-grid" style="margin-top:12px">
+          <div class="field">
+            <input id="email" type="email" placeholder="Email" required>
+          </div>
+          <div class="field">
+            <select id="selectedHouse" required>
+              <option value="">Chọn căn nhà muốn xem</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid" style="margin-top:12px">
+          <div class="field">
+            <input id="appointmentDate" type="date" required>
+          </div>
+          <div class="field">
+            <input id="appointmentTime" type="time" required>
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:12px">
+          <textarea id="message" placeholder="Nội dung cần tư vấn thêm (không bắt buộc)"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" style="margin-top:14px">
+          Gửi yêu cầu
+        </button>
+
+        <div class="note">
+          Hiện đây là bản demo frontend. Bước tiếp theo có thể nối form này với Firebase để lưu dữ liệu khách hàng thật.
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
    <section id="page-contact" class="page hidden-page section">
   <div class="container contact-grid">
     <div class="contact-card glass">
@@ -3047,12 +3125,36 @@ window.__currentGallery = gallery;
   });
 }
 
-    function fillHouseSelect() {
+function fillHouseSelect() {
   const select = document.getElementById('selectedHouse');
   if (!select) return;
-  select.innerHTML = `<option value="">Chọn căn nhà muốn xem</option>` + properties.map(p => `<option value="${p.id}">${p.name} - ${p.location}</option>`).join('');
-}function quickBook(id) {
-  navigate('contact');
+
+  select.innerHTML =
+    `<option value="">Chọn căn nhà muốn xem</option>` +
+    properties.map(p => `<option value="${p.id}">${p.name} - ${p.location}</option>`).join('');
+}
+
+function openBooking(propertyId = null) {
+  navigate('booking');
+
+  setTimeout(() => {
+    fillHouseSelect();
+
+    const select = document.getElementById('selectedHouse');
+    if (select) {
+      select.value = propertyId ? String(propertyId) : '';
+    }
+
+    document.getElementById('fullName')?.focus();
+  }, 30);
+}
+
+function quickBook(id) {
+  openBooking(id);
+}
+
+function prefillContactFromDetail() {
+  openBooking(currentProperty?.id || null);
 }
 
  function prefillContactFromDetail() {
@@ -3168,7 +3270,7 @@ function smartBack() {
       const date = document.getElementById('appointmentDate').value;
       const time = document.getElementById('appointmentTime').value;
 
-      if (!name || !phone || !email || !date || !time) {
+   if (!name || !phone || !email || !houseId || !date || !time) {
         showToast('Vui lòng nhập đầy đủ thông tin trước khi gửi yêu cầu.');
         return;
       }
