@@ -1880,10 +1880,10 @@ select option:hover {
   <h3>Tìm kiếm & lọc</h3>
   <p>Lọc theo nhu cầu như loại nhà, khu vực, mức giá và từ khóa để tìm căn phù hợp nhanh hơn.</p>
 </div>
-<div class="feature-card" onclick="openNextFeatureDetail()" style="cursor:pointer">
-  <div class="icon-box">📍</div>
-  <h3>Chi tiết rõ ràng</h3>
-  <p>Hiển thị diện tích, số phòng, vị trí, tiện ích và mô tả để người dùng có đủ thông tin ra quyết định.</p>
+<div class="feature-card" onclick="openBooking()" style="cursor:pointer">
+  <div class="icon-box">📅</div>
+  <h3>Đặt lịch xem nhà</h3>
+  <p>Điền thông tin để Roomify liên hệ tư vấn và sắp xếp lịch xem nhà phù hợp với bạn.</p>
 </div>
 <div class="feature-card" onclick="navigate('contact')" style="cursor:pointer">
   <div class="icon-box">📲</div>
@@ -3155,10 +3155,6 @@ function quickBook(id) {
 
 function prefillContactFromDetail() {
   openBooking(currentProperty?.id || null);
-}
-
- function prefillContactFromDetail() {
-  navigate('contact');
 }
 
     function showToast(message) {
