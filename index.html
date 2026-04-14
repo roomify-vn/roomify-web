@@ -2742,7 +2742,7 @@ let currentPage = 'home';
 let currentProperty = properties[0];
 let currentGalleryIndex = 0;
 let featureDetailIndex = -1;
-
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx42niGK6CoA9Ho6OlanOLk4lLAfpTP3-xts9VJzi5siFH5wFnnRd-jy4VEkvyf7IXCtw/exec';
 let propertyListState = {
   keyword: '',
   type: 'all',
@@ -3257,19 +3257,65 @@ function smartBack() {
       }
     }
 
- document.getElementById('contactForm')?.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const name = document.getElementById('fullName').value.trim();
-      const phone = document.getElementById('phone').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const houseId = document.getElementById('selectedHouse').value;
-      const date = document.getElementById('appointmentDate').value;
-      const time = document.getElementById('appointmentTime').value;
+document.getElementById('contactForm')?.addEventListener('submit', async function (e) {
+  e.preventDefault();
 
-   if (!name || !phone || !email || !houseId || !date || !time) {
-        showToast('Vui lòng nhập đầy đủ thông tin trước khi gửi yêu cầu.');
-        return;
-      }
+  const name = document.getElementById('fullName').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const houseId = document.getElementById('selectedHouse').value;
+  const date = document.getElementById('appointmentDate').value;
+  const time = document.getElementById('appointmentTime').value;
+  const message = document.getElementById('message').value.trim();
+
+  if (!name || !phone || !email || !houseId || !date || !time) {
+    showToast('Vui lòng nhập đầy đủ thông tin trước khi gửi yêu cầu.');
+    return;
+  }
+
+  const selectedProperty = properties.find(p => String(p.id) === houseId);
+  const houseName = selectedProperty
+    ? `${selectedProperty.name} - ${selectedProperty.location}`
+    : 'Căn nhà đã chọn';
+
+  const submitBtn = this.querySelector('button[type="submit"]');
+
+  try {
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Đang gửi...';
+    }
+
+    const payload = new URLSearchParams({
+      fullName: name,
+      phone: phone,
+      email: email,
+      propertyId: houseId,
+      selectedHouse: houseName,
+      appointmentDate: date,
+      appointmentTime: time,
+      message: message
+    });
+
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: payload,
+      mode: 'no-cors'
+    });
+
+    showToast(`Đã gửi yêu cầu đặt lịch xem ${houseName} thành công.`);
+    this.reset();
+    fillHouseSelect();
+  } catch (error) {
+    console.error(error);
+    showToast('Có lỗi khi gửi dữ liệu. Vui lòng thử lại.');
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Gửi yêu cầu';
+    }
+  }
+});
 
       const houseName = properties.find(p => String(p.id) === houseId)?.name || 'căn nhà bạn quan tâm';
       showToast(`Đã ghi nhận yêu cầu đặt lịch xem ${houseName}. Đây là demo frontend nên dữ liệu chưa được lưu vào server.`);
