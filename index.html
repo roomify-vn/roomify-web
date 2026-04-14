@@ -1783,6 +1783,32 @@ select option:hover {
   font-size: 14px;
   color: var(--muted);
 }
+    .detail-left-heading{
+  margin: 22px 0 14px;
+  font-size: 20px;
+}
+
+.detail-left-amenities{
+  margin-top: 0;
+}
+
+.detail-left-actions{
+  margin-top: 20px;
+}
+
+.detail-left-actions .btn{
+  min-width: 0;
+}
+
+@media (max-width: 820px){
+  .detail-left-actions{
+    flex-direction: column;
+  }
+
+  .detail-left-actions .btn{
+    width: 100%;
+  }
+}
 </style>
 </head>
 <body>
@@ -1970,10 +1996,21 @@ select option:hover {
 
     <section id="page-detail" class="page hidden-page section">
       <div class="container detail-layout">
-        <div class="detail-panel glass">
-          <div class="gallery-main" id="galleryMain"></div>
-          <div class="gallery-thumbs" id="galleryThumbs"></div>
-        </div>
+     <div class="detail-panel glass">
+  <div class="gallery-main" id="galleryMain"></div>
+  <div class="gallery-thumbs" id="galleryThumbs"></div>
+
+  <div id="detailContactMini" class="detail-contact-mini detail-contact-left"></div>
+
+  <h3 class="detail-left-heading">Tiện ích nổi bật</h3>
+  <div class="amenities detail-left-amenities" id="detailAmenities"></div>
+
+  <div class="hero-actions detail-left-actions">
+    <button class="btn btn-primary" onclick="prefillContactFromDetail()">Đặt lịch xem nhà</button>
+    <button class="btn btn-secondary" onclick="navigate('contact')">Tải app để xem VR</button>
+    <button class="btn btn-secondary" onclick="backToProperties()">Quay lại danh sách</button>
+  </div>
+</div>
 
         <div class="detail-panel glass">
           <div class="detail-head">
@@ -1996,14 +2033,6 @@ select option:hover {
 
 <div id="detailContactMini" class="detail-contact-mini"></div>
 
-<h3 style="margin-top:20px">Tiện ích nổi bật</h3>
-<div class="amenities" id="detailAmenities"></div>
-
-      <div class="hero-actions" style="margin-top:20px">
-  <button class="btn btn-primary" onclick="prefillContactFromDetail()">Đặt lịch xem nhà</button>
-  <button class="btn btn-secondary" onclick="navigate('contact')">Tải app để xem VR</button>
-  <button class="btn btn-secondary" onclick="backToProperties()">Quay lại danh sách</button>
-</div>
         </div>
       </div>
     </section>
