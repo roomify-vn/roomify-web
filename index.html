@@ -1958,13 +1958,15 @@ select option:hover {
 
           <div class="property-meta" id="detailMeta"></div>
 
-          <h3>Tour VR</h3>
-          <div class="vr-wrap">
-            <iframe id="detailVR" allowfullscreen loading="lazy"></iframe>
-          </div>
+        <h3>Tour VR</h3>
+<div class="vr-wrap">
+  <iframe id="detailVR" allowfullscreen loading="lazy"></iframe>
+</div>
 
-          <h3 style="margin-top:20px">Tiện ích nổi bật</h3>
-          <div class="amenities" id="detailAmenities"></div>
+<div id="detailContactMini" class="detail-contact-mini"></div>
+
+<h3 style="margin-top:20px">Tiện ích nổi bật</h3>
+<div class="amenities" id="detailAmenities"></div>
 
       <div class="hero-actions" style="margin-top:20px">
   <button class="btn btn-primary" onclick="prefillContactFromDetail()">Đặt lịch xem nhà</button>
@@ -2174,6 +2176,10 @@ select option:hover {
       'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80'
     ]
+    contact: {
+  name: 'Nguyễn Minh Anh',
+  phone: '0903 214 568'
+}
   },
   {
     id: 2,
@@ -2207,6 +2213,7 @@ select option:hover {
       'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=1200&q=80'
     ]
+    contact: { name: 'Trần Quốc Huy', phone: '0912 458 336' }
   },
   {
     id: 3,
@@ -2240,6 +2247,7 @@ select option:hover {
       'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80'
     ]
+    contact: { name: 'Lê Thu Trang', phone: '0905 331 842' }
   },
   {
     id: 4,
@@ -2273,6 +2281,7 @@ select option:hover {
       'https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1560449752-8d1a7b12b8f4?auto=format&fit=crop&w=1200&q=80'
     ]
+    contact: { name: 'Phạm Hoài Nam', phone: '0938 640 251' }
   },
   {
     id: 5,
@@ -2306,6 +2315,7 @@ select option:hover {
       'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1600047509358-9dc75507daeb?auto=format&fit=crop&w=1200&q=80'
     ]
+    contact: { name: 'Đỗ Khánh Linh', phone: '0983 522 117' }
   },
   {
     id: 6,
@@ -2339,6 +2349,7 @@ select option:hover {
       'https://images.unsplash.com/photo-1505692952047-1a78307da8f2?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80'
     ]
+    contact: { name: 'Võ Gia Hân', phone: '0908 172 664' }
   },
   {
     id: 7,
@@ -2372,6 +2383,7 @@ select option:hover {
       'https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80'
     ]
+    contact: { name: 'Ngô Đức Mạnh', phone: '0917 243 905' }
   },
   {
     id: 8,
@@ -2405,6 +2417,7 @@ select option:hover {
       'https://images.unsplash.com/photo-1560449752-8d1a7b12b8f4?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=1200&q=80'
     ]
+    contact: { name: 'Bùi Thanh Tâm', phone: '0944 870 223' }
   },
   {
     id: 9,
@@ -2438,6 +2451,7 @@ select option:hover {
       'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1600047509358-9dc75507daeb?auto=format&fit=crop&w=1200&q=80'
     ]
+    contact: { name: 'Hoàng Diệu My', phone: '0976 351 480' }
   },
   {
     id: 10,
@@ -2471,6 +2485,7 @@ select option:hover {
       'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=80'
     ]
+    contact: { name: 'Nguyễn Văn Khải', phone: '0928 461 759' }
   },
   {
     id: 11,
@@ -2504,6 +2519,7 @@ select option:hover {
       'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80'
     ]
+    contact: { name: 'Trương Hải Đăng', phone: '0905 118 623' }
   },
   {
     id: 12,
@@ -2537,6 +2553,7 @@ select option:hover {
       'https://images.unsplash.com/photo-1600047509358-9dc75507daeb?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80'
     ]
+    contact: { name: 'Phan Ngọc Hạ', phone: '0935 724 181' }
   },
   {
     id: 13,
@@ -2570,6 +2587,7 @@ select option:hover {
       'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80'
     ]
+    contact: { name: 'Lý Gia Bảo', phone: '0918 377 642' }
   },
   {
     id: 14,
@@ -2603,6 +2621,7 @@ select option:hover {
       'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80'
     ]
+    contact: { name: 'Mai Hồng Phúc', phone: '0962 845 310' }
   },
   {
     id: 15,
@@ -2636,6 +2655,7 @@ select option:hover {
       'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80'
     ]
+    contact: { name: 'Tôn Nữ Khánh Vy', phone: '0935 280 416' }
   },
   {
     id: 16,
@@ -2669,6 +2689,7 @@ select option:hover {
       'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?auto=format&fit=crop&w=1200&q=80'
     ]
+    contact: { name: 'Nguyễn Hữu Phước', phone: '0914 602 537' }
   },
   {
     id: 17,
@@ -2702,6 +2723,7 @@ select option:hover {
       'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1560449752-8d1a7b12b8f4?auto=format&fit=crop&w=1200&q=80'
     ]
+    contact: { name: 'Lê Thảo Nhi', phone: '0981 337 924' }
   },
   {
     id: 18,
@@ -2735,6 +2757,7 @@ select option:hover {
       'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80'
     ]
+    contact: { name: 'Phạm Nhật Minh', phone: '0901 745 688' }
   }
 ];
 
