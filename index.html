@@ -3317,12 +3317,7 @@ document.getElementById('contactForm')?.addEventListener('submit', async functio
   }
 });
 
-      const houseName = properties.find(p => String(p.id) === houseId)?.name || 'căn nhà bạn quan tâm';
-      showToast(`Đã ghi nhận yêu cầu đặt lịch xem ${houseName}. Đây là demo frontend nên dữ liệu chưa được lưu vào server.`);
-      this.reset();
-   
-      fillHouseSelect();
-    });
+     
 
     document.getElementById('searchInput')?.addEventListener('input', renderProperties);
     document.getElementById('typeFilter')?.addEventListener('change', renderProperties);
