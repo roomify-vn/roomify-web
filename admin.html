@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roomify Admin - Bookings</title>
+  <style>
+    :root{
+      --bg:#07111f;
+      --bg-soft:#0d1b2f;
+      --card:rgba(255,255,255,0.05);
+      --text:#eef4ff;
+      --muted:#9fb0cc;
+      --gold:#f7c56a;
+      --line:rgba(255,255,255,0.10);
+      --shadow:0 18px 40px rgba(0,0,0,.25);
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(247,197,106,0.10), transparent 28%),
+        radial-gradient(circle at top right, rgba(87,123,255,0.10), transparent 28%),
+        linear-gradient(180deg, #06101d 0%, #081425 45%, #0a1322 100%);
+      min-height:100vh;
+    }
+
+    .container{
+      width:min(1280px, calc(100% - 32px));
+      margin:0 auto;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:20;
+      backdrop-filter:blur(10px);
+      background:rgba(6,16,29,.88);
+      border-bottom:1px solid var(--line);
+    }
+
+    .topbar-inner{
+      min-height:76px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+    }
+
+    .brand{
+      font-size:28px;
+      font-weight:900;
+      color:var(--gold);
+    }
+
+    .sub{
+      color:var(--muted);
+      font-size:14px;
+      margin-top:4px;
+    }
+
+    .section{
+      padding:28px 0 40px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(4, 1fr);
+      gap:16px;
+      margin-bottom:20px;
+    }
+
+    .card{
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.025)),
+        linear-gradient(135deg, rgba(247,197,106,.08), rgba(216,139,31,.03) 45%, rgba(255,255,255,.015) 100%);
+      border:1px solid rgba(247,197,106,.18);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+    }
+
+    .stat{
+      padding:20px;
+    }
+
+    .stat-label{
+      color:var(--muted);
+      font-size:14px;
+      margin-bottom:10px;
+    }
+
+    .stat-value{
+      font-size:28px;
+      font-weight:900;
+      color:#ffd89a;
+    }
+
+    .toolbar{
+      padding:18px;
+      display:grid;
+      grid-template-columns:1.2fr .8fr .8fr auto;
+      gap:12px;
+      align-items:center;
+      margin-bottom:18px;
+    }
+
+    input, select, button, textarea{
+      font:inherit;
+    }
+
+    input, select{
+      width:100%;
+      padding:14px 14px;
+      border-radius:16px;
+      border:1px solid rgba(247,197,106,.16);
+      background:rgba(255,255,255,.05);
+      color:#fff;
+      outline:none;
+    }
+
+    select option{
+      color:#000;
+    }
+
+    button{
+      cursor:pointer;
+      border:none;
+      border-radius:16px;
+      padding:14px 18px;
+      font-weight:800;
+      transition:.2s ease;
+    }
+
+    button:hover{
+      transform:translateY(-1px);
+    }
+
+    .btn-primary{
+      color:#1e1200;
+      background:linear-gradient(135deg, #ffd992, #f2b142 60%, #d4871f);
+      box-shadow:0 10px 26px rgba(242,177,66,.30);
+    }
+
+    .btn-secondary{
+      background:rgba(255,255,255,.06);
+      color:#eef4ff;
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    .table-card{
+      padding:18px;
+      overflow:auto;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:1080px;
+    }
+
+    th, td{
+      text-align:left;
+      padding:14px 12px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      vertical-align:top;
+      font-size:14px;
+    }
+
+    th{
+      color:#ffe7b6;
+      font-size:13px;
+      font-weight:800;
+      letter-spacing:.2px;
+      background:rgba(255,255,255,.03);
+      position:sticky;
+      top:0;
+    }
+
+    td{
+      color:#eaf2ff;
+    }
+
+    .muted{
+      color:var(--muted);
+    }
+
+    .status-badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:96px;
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.05);
+    }
+
+    .status-new{ color:#ffe7b6; border-color:rgba(247,197,106,.28); }
+    .status-contacted{ color:#9fd4ff; border-color:rgba(120,180,255,.28); }
+    .status-scheduled{ color:#9ff0c6; border-color:rgba(109,226,179,.28); }
+    .status-done{ color:#b8ffcc; border-color:rgba(120,255,160,.28); }
+    .status-canceled{ color:#ffb3b3; border-color:rgba(255,120,120,.28); }
+
+    .row-actions{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      min-width:160px;
+    }
+
+    .row-actions select,
+    .row-actions button{
+      width:100%;
+    }
+
+    .empty{
+      padding:28px;
+      text-align:center;
+      color:var(--muted);
+    }
+
+    .loading{
+      padding:22px;
+      color:var(--muted);
+    }
+
+    .toast{
+      position:fixed;
+      right:18px;
+      bottom:18px;
+      min-width:260px;
+      max-width:360px;
+      padding:16px 18px;
+      border-radius:18px;
+      background:rgba(13,27,47,.96);
+      border:1px solid rgba(247,197,106,.24);
+      color:#eef4ff;
+      box-shadow:var(--shadow);
+      opacity:0;
+      transform:translateY(10px);
+      pointer-events:none;
+      transition:.25s ease;
+    }
+
+    .toast.show{
+      opacity:1;
+      transform:translateY(0);
+    }
+
+    @media (max-width:1100px){
+      .grid,
+      .toolbar{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div>
+        <div class="brand">Roomify Admin</div>
+        <div class="sub">Quản lý bookings</div>
+      </div>
+      <button class="btn-secondary" onclick="loadBookings()">Tải lại dữ liệu</button>
+    </div>
+  </header>
+
+  <main class="section">
+    <div class="container">
+      <div class="grid">
+        <div class="card stat">
+          <div class="stat-label">Tổng bookings</div>
+          <div class="stat-value" id="statTotal">0</div>
+        </div>
+        <div class="card stat">
+          <div class="stat-label">Booking mới</div>
+          <div class="stat-value" id="statNew">0</div>
+        </div>
+        <div class="card stat">
+          <div class="stat-label">Đã liên hệ</div>
+          <div class="stat-value" id="statContacted">0</div>
+        </div>
+        <div class="card stat">
+          <div class="stat-label">Đã hẹn / hoàn tất</div>
+          <div class="stat-value" id="statDone">0</div>
+        </div>
+      </div>
+
+      <div class="card toolbar">
+        <input id="searchInput" type="text" placeholder="Tìm theo tên khách, điện thoại, email, căn nhà..." />
+        <select id="statusFilter">
+          <option value="all">Tất cả trạng thái</option>
+          <option value="new">new</option>
+          <option value="contacted">contacted</option>
+          <option value="scheduled">scheduled</option>
+          <option value="done">done</option>
+          <option value="canceled">canceled</option>
+        </select>
+        <select id="sourceFilter">
+          <option value="all">Tất cả nguồn</option>
+          <option value="website">website</option>
+        </select>
+        <button class="btn-primary" onclick="renderBookings()">Lọc dữ liệu</button>
+      </div>
+
+      <div class="card table-card">
+        <div id="tableWrap" class="loading">Đang tải dữ liệu bookings...</div>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5elNYXyxacNzB0vvWkkAqbC-v8sK2beBFiG2xf6PPgmswAv9ISkO5W6CJMILbGI42AA/exec';
+
+    let allBookings = [];
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+
+    function normalizeStatus(status) {
+      return String(status || 'new').trim().toLowerCase();
+    }
+
+    function getStatusClass(status) {
+      const s = normalizeStatus(status);
+      if (s === 'new') return 'status-new';
+      if (s === 'contacted') return 'status-contacted';
+      if (s === 'scheduled') return 'status-scheduled';
+      if (s === 'done') return 'status-done';
+      if (s === 'canceled') return 'status-canceled';
+      return '';
+    }
+
+    function updateStats(bookings) {
+      const total = bookings.length;
+      const countNew = bookings.filter(b => normalizeStatus(b.status) === 'new').length;
+      const countContacted = bookings.filter(b => normalizeStatus(b.status) === 'contacted').length;
+      const countDone = bookings.filter(b => ['scheduled', 'done'].includes(normalizeStatus(b.status))).length;
+
+      document.getElementById('statTotal').textContent = total;
+      document.getElementById('statNew').textContent = countNew;
+      document.getElementById('statContacted').textContent = countContacted;
+      document.getElementById('statDone').textContent = countDone;
+    }
+
+    function getFilteredBookings() {
+      const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+      const status = document.getElementById('statusFilter').value;
+      const source = document.getElementById('sourceFilter').value;
+
+      return allBookings.filter(item => {
+        const text = [
+          item.bookingId,
+          item.fullName,
+          item.phone,
+          item.email,
+          item.selectedHouse,
+          item.message,
+          item.note
+        ].join(' ').toLowerCase();
+
+        const matchKeyword = !keyword || text.includes(keyword);
+        const matchStatus = status === 'all' || normalizeStatus(item.status) === status;
+        const matchSource = source === 'all' || String(item.source || '') === source;
+
+        return matchKeyword && matchStatus && matchSource;
+      });
+    }
+
+    function renderBookings() {
+      const filtered = getFilteredBookings();
+      const tableWrap = document.getElementById('tableWrap');
+
+      updateStats(allBookings);
+
+      if (!filtered.length) {
+        tableWrap.innerHTML = '<div class="empty">Không có bookings phù hợp.</div>';
+        return;
+      }
+
+      tableWrap.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Mã</th>
+              <th>Khách hàng</th>
+              <th>Căn nhà</th>
+              <th>Lịch hẹn</th>
+              <th>Trạng thái</th>
+              <th>Ghi chú</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filtered.map(item => `
+              <tr>
+                <td>
+                  <strong>${item.bookingId || ''}</strong><br>
+                  <span class="muted">${item.createdAt || ''}</span>
+                </td>
+                <td>
+                  <strong>${item.fullName || ''}</strong><br>
+                  <span class="muted">📞 ${item.phone || ''}</span><br>
+                  <span class="muted">✉️ ${item.email || ''}</span>
+                </td>
+                <td>
+                  <strong>${item.selectedHouse || ''}</strong><br>
+                  <span class="muted">propertyId: ${item.propertyId || ''}</span><br>
+                  <span class="muted">source: ${item.source || ''}</span>
+                </td>
+                <td>
+                  <strong>${item.appointmentDate || ''}</strong><br>
+                  <span class="muted">${item.appointmentTime || ''}</span><br>
+                  <span class="muted">${item.message || ''}</span>
+                </td>
+                <td>
+                  <span class="status-badge ${getStatusClass(item.status)}">${normalizeStatus(item.status)}</span><br><br>
+                  <span class="muted">Xử lý: ${item.assignedTo || ''}</span>
+                </td>
+                <td>
+                  <span>${item.note || ''}</span>
+                </td>
+                <td>
+                  <div class="row-actions">
+                    <select id="status-${item.bookingId}">
+                      <option value="new" ${normalizeStatus(item.status) === 'new' ? 'selected' : ''}>new</option>
+                      <option value="contacted" ${normalizeStatus(item.status) === 'contacted' ? 'selected' : ''}>contacted</option>
+                      <option value="scheduled" ${normalizeStatus(item.status) === 'scheduled' ? 'selected' : ''}>scheduled</option>
+                      <option value="done" ${normalizeStatus(item.status) === 'done' ? 'selected' : ''}>done</option>
+                      <option value="canceled" ${normalizeStatus(item.status) === 'canceled' ? 'selected' : ''}>canceled</option>
+                    </select>
+                    <input id="assigned-${item.bookingId}" type="text" placeholder="Người xử lý" value="${item.assignedTo || ''}">
+                    <input id="note-${item.bookingId}" type="text" placeholder="Ghi chú admin" value="${item.note || ''}">
+                    <button class="btn-primary" onclick="updateBooking('${item.bookingId}')">Lưu</button>
+                  </div>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    async function loadBookings() {
+      const tableWrap = document.getElementById('tableWrap');
+      tableWrap.innerHTML = '<div class="loading">Đang tải dữ liệu bookings...</div>';
+
+      try {
+        const url = `${APPS_SCRIPT_URL}?action=getBookings&_t=${Date.now()}`;
+        const res = await fetch(url);
+        const json = await res.json();
+
+        if (!json.ok) {
+          throw new Error(json.error || 'Không đọc được dữ liệu bookings');
+        }
+
+        allBookings = Array.isArray(json.data) ? json.data : [];
+        allBookings.sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+        renderBookings();
+      } catch (error) {
+        console.error(error);
+        tableWrap.innerHTML = `<div class="empty">Lỗi tải dữ liệu: ${error.message}</div>`;
+      }
+    }
+
+    async function updateBooking(bookingId) {
+      const status = document.getElementById(`status-${bookingId}`).value;
+      const assignedTo = document.getElementById(`assigned-${bookingId}`).value.trim();
+      const note = document.getElementById(`note-${bookingId}`).value.trim();
+
+      try {
+        const payload = new URLSearchParams({
+          action: 'updateBookingStatus',
+          bookingId,
+          status,
+          assignedTo,
+          note
+        });
+
+        await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: payload,
+          mode: 'no-cors'
+        });
+
+        const item = allBookings.find(b => String(b.bookingId) === String(bookingId));
+        if (item) {
+          item.status = status;
+          item.assignedTo = assignedTo;
+          item.note = note;
+        }
+
+        renderBookings();
+        showToast(`Đã cập nhật ${bookingId}`);
+      } catch (error) {
+        console.error(error);
+        showToast('Có lỗi khi cập nhật booking');
+      }
+    }
+
+    document.getElementById('searchInput').addEventListener('input', renderBookings);
+    document.getElementById('statusFilter').addEventListener('change', renderBookings);
+    document.getElementById('sourceFilter').addEventListener('change', renderBookings);
+
+    loadBookings();
+  </script>
+</body>
+</html>
