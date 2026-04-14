@@ -3379,16 +3379,18 @@ document.getElementById('contactForm')?.addEventListener('submit', async functio
       submitBtn.textContent = 'Đang gửi...';
     }
 
-    const payload = new URLSearchParams({
-      fullName: name,
-      phone: phone,
-      email: email,
-      propertyId: houseId,
-      selectedHouse: houseName,
-      appointmentDate: date,
-      appointmentTime: time,
-      message: message
-    });
+ const payload = new URLSearchParams({
+  action: 'createBooking',
+  fullName: name,
+  phone: phone,
+  email: email,
+  propertyId: houseId,
+  selectedHouse: houseName,
+  appointmentDate: date,
+  appointmentTime: time,
+  message: message,
+  source: 'website'
+});
 
     await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
