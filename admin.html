@@ -510,6 +510,7 @@
         <button class="nav-btn active" data-tab="tong-quan" onclick="switchTab('tong-quan')">Tổng quan</button>
         <button class="nav-btn" data-tab="dat-lich" onclick="switchTab('dat-lich')">Đặt lịch & lead</button>
         <button class="nav-btn" data-tab="can-nha" onclick="switchTab('can-nha')">Quản lý căn nhà</button>
+        <button class="nav-btn" data-tab="ai-listing" onclick="switchTab('ai-listing')">AI tạo listing</button>
         <button class="nav-btn" data-tab="nguoi-dung" onclick="switchTab('nguoi-dung')">Quản lý người dùng</button>
         <button class="nav-btn" data-tab="kiem-duyet" onclick="switchTab('kiem-duyet')">Kiểm duyệt bất động sản</button>
         <button class="nav-btn" data-tab="media-vr" onclick="switchTab('media-vr')">Media / 360 / VR</button>
@@ -798,7 +799,48 @@
           </div>
         </div>
       </div>
+<div id="tab-ai-listing" class="hidden">
+  <div class="content-card section-header">
+    <h1 class="section-title">AI tạo listing</h1>
+    <p class="section-desc">
+      Dán link ảnh bất động sản để Gemini phân tích và tự tạo nháp listing cho Roomify.
+    </p>
+  </div>
 
+  <div class="panel-wrap">
+    <div class="form-card">
+      <h2 class="form-title">Phân tích ảnh bằng AI</h2>
+
+      <div class="field">
+        <label>Link ảnh đầu vào</label>
+        <input id="aiImageUrl" type="text" placeholder="https://...jpg hoặc link ảnh công khai">
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-primary" onclick="analyzeAiImage()">Phân tích AI</button>
+        <button class="btn-secondary" onclick="createAiDraft()">Lưu thành căn nhà nháp</button>
+      </div>
+
+      <div class="field" style="margin-top:16px;">
+        <label>Xem trước JSON AI</label>
+        <textarea id="aiJsonPreview" readonly style="min-height:260px;"></textarea>
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <h2 class="form-title">Tóm tắt AI</h2>
+      <div class="placeholder-list">
+        <div class="placeholder-item"><strong>Tên gợi ý:</strong> <span id="aiPreviewTitle">—</span></div>
+        <div class="placeholder-item"><strong>Loại nhà:</strong> <span id="aiPreviewType">—</span></div>
+        <div class="placeholder-item"><strong>Khu vực:</strong> <span id="aiPreviewArea">—</span></div>
+        <div class="placeholder-item"><strong>Vị trí:</strong> <span id="aiPreviewLocation">—</span></div>
+        <div class="placeholder-item"><strong>Số phòng:</strong> <span id="aiPreviewRooms">—</span></div>
+        <div class="placeholder-item"><strong>Diện tích:</strong> <span id="aiPreviewAreaValue">—</span></div>
+        <div class="placeholder-item"><strong>Mô tả:</strong> <span id="aiPreviewDesc">—</span></div>
+      </div>
+    </div>
+  </div>
+</div>
       <!-- NGƯỜI DÙNG -->
       <div id="tab-nguoi-dung" class="hidden">
         <div class="content-card section-header">
@@ -989,7 +1031,84 @@
         loadProperties();
         return;
       }
+let currentAiJobId = '';
+let currentAiAnalysis = null;
 
+function fillAiPreview(analysis) {
+  document.getElementById('aiJsonPreview').value = JSON.stringify(analysis, null, 2);
+  document.getElementById('aiPreviewTitle').textContent = analysis.title || '—';
+  document.getElementById('aiPreviewType').textContent = analysis.propertyType || '—';
+  document.getElementById('aiPreviewArea').textContent = analysis.areaGroup || '—';
+  document.getElementById('aiPreviewLocation').textContent = analysis.location || '—';
+  document.getElementById('aiPreviewRooms').textContent =
+    `${analysis.rooms || '—'} phòng • ${analysis.bathrooms || '—'} WC`;
+  document.getElementById('aiPreviewAreaValue').textContent =
+    analysis.area ? `${analysis.area} m²` : '—';
+  document.getElementById('aiPreviewDesc').textContent = analysis.description || '—';
+}
+
+async function analyzeAiImage() {
+  const imageUrl = document.getElementById('aiImageUrl').value.trim();
+
+  if (!imageUrl) {
+    showToast('Vui lòng dán link ảnh trước.');
+    return;
+  }
+
+  try {
+    showToast('Đang phân tích ảnh bằng Gemini...');
+
+    const res = await fetch(
+      `${APPS_SCRIPT_URL}?action=analyzePropertyImage&imageUrl=${encodeURIComponent(imageUrl)}&_t=${Date.now()}`
+    );
+    const json = await res.json();
+
+    if (!json.ok) {
+      throw new Error(json.error || 'Không phân tích được ảnh');
+    }
+
+    currentAiJobId = json.data.jobId;
+    currentAiAnalysis = json.data.analysis;
+    fillAiPreview(currentAiAnalysis);
+
+    showToast(`AI đã phân tích xong. Job: ${currentAiJobId}`);
+  } catch (error) {
+    console.error(error);
+    showToast(`Lỗi AI: ${error.message}`);
+  }
+}
+
+async function createAiDraft() {
+  if (!currentAiJobId) {
+    showToast('Bạn cần phân tích ảnh trước.');
+    return;
+  }
+
+  try {
+    showToast('Đang tạo căn nhà nháp từ AI...');
+
+    const res = await fetch(
+      `${APPS_SCRIPT_URL}?action=createAiDraft&jobId=${encodeURIComponent(currentAiJobId)}&_t=${Date.now()}`
+    );
+    const json = await res.json();
+
+    if (!json.ok) {
+      throw new Error(json.error || 'Không tạo được căn nhà nháp');
+    }
+
+    await loadProperties(false);
+    updateDashboard();
+
+    const propertyId = json.data.propertyId;
+    switchTab('can-nha');
+    fillPropertyFormById(propertyId);
+
+    showToast(`Đã tạo căn nhà nháp AI: ${json.data.propertyCode}`);
+  } catch (error) {
+    console.error(error);
+    showToast(`Lỗi lưu nháp AI: ${error.message}`);
+  }
+}
       Promise.all([loadBookings(false), loadProperties(false)]).then(() => {
         updateDashboard();
         showToast('Đã tải lại dữ liệu');
