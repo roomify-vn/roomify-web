@@ -1389,8 +1389,12 @@
                 </td>
                 <td>
   <div style="display:flex; flex-direction:column; gap:8px; min-width:120px">
-    <button class="btn-secondary" onclick="editProperty('${item.propertyId}')">Sửa</button>
-    <button class="btn-secondary" onclick="deleteProperty('${item.propertyId}', '${String(item.name || '').replace(/'/g, "\\'")}')">Xóa</button>
+   <button class="btn-secondary" onclick="editProperty('${item.propertyId}')">Sửa</button>
+${
+  normalizePropertyStatus(item.status) === 'hidden'
+    ? `<button class="btn-secondary" onclick="showProperty('${item.propertyId}', '${String(item.name || '').replace(/'/g, "\\'")}')">Hiện lại</button>`
+    : `<button class="btn-secondary" onclick="hideProperty('${item.propertyId}', '${String(item.name || '').replace(/'/g, "\\'")}')">Ẩn</button>`
+}
   </div>
 </td>
               </tr>
@@ -1457,13 +1461,13 @@ function editProperty(propertyId) {
   }, 120);
 }
 
-async function deleteProperty(propertyId, propertyName) {
-  const ok = confirm(`Bạn có chắc muốn xóa căn nhà "${propertyName}" không?`);
+async function hideProperty(propertyId, propertyName) {
+  const ok = confirm(`Bạn có chắc muốn ẩn căn nhà "${propertyName}" khỏi web không?`);
   if (!ok) return;
 
   try {
     const payload = new URLSearchParams({
-      action: 'deleteProperty',
+      action: 'hideProperty',
       propertyId
     });
 
@@ -1473,16 +1477,15 @@ async function deleteProperty(propertyId, propertyName) {
       mode: 'no-cors'
     });
 
-    // Đợi Apps Script xử lý xong rồi đọc lại từ server
     setTimeout(async () => {
       await loadProperties(false);
 
-      const stillExists = allProperties.some(
+      const item = allProperties.find(
         x => String(x.propertyId) === String(propertyId)
       );
 
-      if (stillExists) {
-        showToast('Chưa xóa được trong Google Sheet. Kiểm tra Apps Script / deployment.');
+      if (!item || normalizePropertyStatus(item.status) !== 'hidden') {
+        showToast('Chưa ẩn được căn nhà. Kiểm tra Apps Script / deployment.');
         return;
       }
 
@@ -1492,11 +1495,47 @@ async function deleteProperty(propertyId, propertyName) {
       }
 
       updateDashboard();
-      showToast(`Đã xóa thật: ${propertyName}`);
-    }, 1500);
+      renderProperties();
+      showToast(`Đã ẩn: ${propertyName}`);
+    }, 1200);
   } catch (error) {
     console.error(error);
-    showToast('Có lỗi khi xóa căn nhà');
+    showToast('Có lỗi khi ẩn căn nhà');
+  }
+}
+
+async function showProperty(propertyId, propertyName) {
+  try {
+    const payload = new URLSearchParams({
+      action: 'showProperty',
+      propertyId
+    });
+
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: payload,
+      mode: 'no-cors'
+    });
+
+    setTimeout(async () => {
+      await loadProperties(false);
+
+      const item = allProperties.find(
+        x => String(x.propertyId) === String(propertyId)
+      );
+
+      if (!item || normalizePropertyStatus(item.status) !== 'published') {
+        showToast('Chưa hiện lại được căn nhà. Kiểm tra Apps Script / deployment.');
+        return;
+      }
+
+      updateDashboard();
+      renderProperties();
+      showToast(`Đã hiện lại: ${propertyName}`);
+    }, 1200);
+  } catch (error) {
+    console.error(error);
+    showToast('Có lỗi khi hiện lại căn nhà');
   }
 }
 
