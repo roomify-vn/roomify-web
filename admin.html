@@ -1473,16 +1473,27 @@ async function deleteProperty(propertyId, propertyName) {
       mode: 'no-cors'
     });
 
-    allProperties = allProperties.filter(x => String(x.propertyId) !== String(propertyId));
-    renderProperties();
-    updateDashboard();
+    // Đợi Apps Script xử lý xong rồi đọc lại từ server
+    setTimeout(async () => {
+      await loadProperties(false);
 
-    const currentEditingId = document.getElementById('propertyId')?.value?.trim();
-    if (String(currentEditingId) === String(propertyId)) {
-      resetPropertyForm();
-    }
+      const stillExists = allProperties.some(
+        x => String(x.propertyId) === String(propertyId)
+      );
 
-    showToast(`Đã xóa: ${propertyName}`);
+      if (stillExists) {
+        showToast('Chưa xóa được trong Google Sheet. Kiểm tra Apps Script / deployment.');
+        return;
+      }
+
+      const currentEditingId = document.getElementById('propertyId')?.value?.trim();
+      if (String(currentEditingId) === String(propertyId)) {
+        resetPropertyForm();
+      }
+
+      updateDashboard();
+      showToast(`Đã xóa thật: ${propertyName}`);
+    }, 1500);
   } catch (error) {
     console.error(error);
     showToast('Có lỗi khi xóa căn nhà');
