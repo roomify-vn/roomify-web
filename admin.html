@@ -511,14 +511,6 @@
         <button class="nav-btn" data-tab="dat-lich" onclick="switchTab('dat-lich')">Đặt lịch & lead</button>
         <button class="nav-btn" data-tab="can-nha" onclick="switchTab('can-nha')">Quản lý căn nhà</button>
         <button class="nav-btn" data-tab="ai-listing" onclick="switchTab('ai-listing')">AI tạo listing</button>
-        <button class="nav-btn" data-tab="nguoi-dung" onclick="switchTab('nguoi-dung')">Quản lý người dùng</button>
-        <button class="nav-btn" data-tab="kiem-duyet" onclick="switchTab('kiem-duyet')">Kiểm duyệt bất động sản</button>
-        <button class="nav-btn" data-tab="media-vr" onclick="switchTab('media-vr')">Media / 360 / VR</button>
-        <button class="nav-btn" data-tab="danh-muc" onclick="switchTab('danh-muc')">Danh mục hệ thống</button>
-        <button class="nav-btn" data-tab="bao-cao" onclick="switchTab('bao-cao')">Báo cáo quản trị</button>
-        <button class="nav-btn" data-tab="thanh-toan" onclick="switchTab('thanh-toan')">Thanh toán & gói dịch vụ</button>
-        <button class="nav-btn" data-tab="thong-bao" onclick="switchTab('thong-bao')">Thông báo hệ thống</button>
-        <button class="nav-btn" data-tab="audit" onclick="switchTab('audit')">Nhật ký & bảo mật</button>
       </div>
     </aside>
 
@@ -765,15 +757,14 @@
               <label>Mô tả căn nhà</label>
               <textarea id="description" placeholder="Nhập mô tả căn nhà..."></textarea>
             </div>
+<div class="btn-row">
+  <button class="btn-primary" onclick="saveProperty()">Lưu căn nhà</button>
+  <button class="btn-secondary" onclick="resetPropertyForm()">Xóa form</button>
+</div>
+</div>
 
-            <div class="btn-row">
-              <button class="btn-primary" onclick="saveProperty()">Lưu căn nhà</button>
-              <button class="btn-secondary" onclick="resetPropertyForm()">Xóa form</button>
-            </div>
-          </div>
-
-          <div>
-            <div class="toolbar toolbar-properties">
+<div>
+  <div class="toolbar toolbar-properties">
               <input id="propertySearchInput" type="text" placeholder="Tìm theo tên nhà, địa điểm, mã căn..." />
               <select id="typeFilterProperty">
                 <option value="all">Tất cả loại nhà</option>
@@ -813,7 +804,7 @@
 
      <div class="field">
   <label>Chọn ảnh từ máy</label>
-  <input id="aiImageFile" type="file" accept="image/*">
+<input id="aiImageFile" type="file" accept="image/*" multiple>
 </div>
 <div class="field">
   <label>Hoặc dán ảnh bằng Ctrl + V</label>
@@ -840,27 +831,47 @@
   </div>
 </div>
 <div class="field">
-  <label>Hoặc dán link ảnh</label>
-  <input id="aiImageUrl" type="text" placeholder="https://...jpg hoặc để trống nếu đã chọn ảnh">
+  <label>Hoặc dán nhiều link ảnh, mỗi dòng 1 link</label>
+  <textarea id="aiImageUrl" placeholder="https://...jpg&#10;https://...png&#10;hoặc sẽ tự điền data:image khi bạn chọn ảnh"></textarea>
 </div>
 
 <div class="field">
   <label>Xem trước ảnh</label>
-  <div style="width:100%; aspect-ratio:16/10; border-radius:16px; overflow:hidden; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.04);">
-    <img id="aiImagePreview" src="" alt="Preview AI" style="width:100%; height:100%; object-fit:cover; display:none;">
-  </div>
+  <div id="aiPreviewGrid" style="
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:12px;
+  "></div>
 </div>
-      <div class="btn-row">
-        <button class="btn-primary" onclick="analyzeAiImage()">Phân tích AI</button>
-        <button class="btn-secondary" onclick="createAiDraft()">Lưu thành căn nhà nháp</button>
-      </div>
+     <div class="btn-row">
+  <button class="btn-primary" onclick="analyzeAiImage()">Phân tích AI</button>
+  <button class="btn-secondary" onclick="generateAiVideo()">Tạo video AI</button>
+  <button class="btn-secondary" onclick="createAiDraft()">Lưu thành căn nhà nháp</button>
+</div>
 
       <div class="field" style="margin-top:16px;">
         <label>Xem trước JSON AI</label>
         <textarea id="aiJsonPreview" readonly style="min-height:260px;"></textarea>
       </div>
+      <div class="field" style="margin-top:16px;">
+  <label>Video AI</label>
+  <div id="aiVideoWrap" style="
+    width:100%;
+    min-height:220px;
+    border-radius:16px;
+    border:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.04);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#9fb0cc;
+    text-align:center;
+    padding:18px;
+  ">
+    Chưa có video AI
+  </div>
+</div>
     </div>
-
     <div class="panel-card">
       <h2 class="form-title">Tóm tắt AI</h2>
       <div class="placeholder-list">
@@ -875,141 +886,6 @@
     </div>
   </div>
 </div>
-      <!-- NGƯỜI DÙNG -->
-      <div id="tab-nguoi-dung" class="hidden">
-        <div class="content-card section-header">
-          <h1 class="section-title">Quản lý người dùng</h1>
-          <p class="section-desc">Quản lý users, owners, agents, admin; khóa / mở khóa tài khoản, đổi vai trò và hỗ trợ khôi phục.</p>
-        </div>
-        <div class="placeholder-card">
-          <h3>Chức năng sẽ làm tiếp</h3>
-          <div class="placeholder-list">
-            <div class="placeholder-item">Xem danh sách users / owners / agents / admins</div>
-            <div class="placeholder-item">Khóa / mở khóa tài khoản</div>
-            <div class="placeholder-item">Đổi trạng thái: hoạt động, tạm ngưng, bị cấm</div>
-            <div class="placeholder-item">Đổi vai trò: user, owner, agent, admin</div>
-            <div class="placeholder-item">Reset mật khẩu / hỗ trợ khôi phục</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- KIỂM DUYỆT -->
-      <div id="tab-kiem-duyet" class="hidden">
-        <div class="content-card section-header">
-          <h1 class="section-title">Kiểm duyệt bất động sản</h1>
-          <p class="section-desc">Duyệt bài trước khi hiển thị công khai, từ chối bài không hợp lệ, ghi chú lý do, ẩn hoặc gỡ bài vi phạm.</p>
-        </div>
-        <div class="placeholder-card">
-          <h3>Trạng thái kiểm duyệt dự kiến</h3>
-          <div class="placeholder-list">
-            <div class="placeholder-item">draft / pending / approved / rejected / hidden</div>
-            <div class="placeholder-item">Lý do từ chối listing</div>
-            <div class="placeholder-item">Gỡ bài khi có báo cáo hoặc vi phạm</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- MEDIA VR -->
-      <div id="tab-media-vr" class="hidden">
-        <div class="content-card section-header">
-          <h1 class="section-title">Media / 360 / VR</h1>
-          <p class="section-desc">Kiểm tra VR tour, ảnh đại diện, ảnh chi tiết và chất lượng media của từng căn nhà.</p>
-        </div>
-        <div class="placeholder-card">
-          <h3>Chức năng sẽ làm tiếp</h3>
-          <div class="placeholder-list">
-            <div class="placeholder-item">Kiểm tra link tour 360 / VR có hoạt động hay không</div>
-            <div class="placeholder-item">Đổi ảnh đại diện listing</div>
-            <div class="placeholder-item">Gỡ media lỗi / sai / kém chất lượng</div>
-            <div class="placeholder-item">Quản lý ảnh phụ của từng bất động sản</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- DANH MỤC -->
-      <div id="tab-danh-muc" class="hidden">
-        <div class="content-card section-header">
-          <h1 class="section-title">Danh mục hệ thống</h1>
-          <p class="section-desc">Quản lý loại bất động sản, tiện ích, khu vực, gói dịch vụ, banner và nội dung trang chủ.</p>
-        </div>
-        <div class="placeholder-card">
-          <h3>Dữ liệu nền sẽ quản lý tiếp</h3>
-          <div class="placeholder-list">
-            <div class="placeholder-item">Loại bất động sản</div>
-            <div class="placeholder-item">Tiện ích</div>
-            <div class="placeholder-item">Khu vực / thành phố / quận huyện</div>
-            <div class="placeholder-item">Gói dịch vụ / bảng giá / featured listings</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- BÁO CÁO -->
-      <div id="tab-bao-cao" class="hidden">
-        <div class="content-card section-header">
-          <h1 class="section-title">Báo cáo quản trị</h1>
-          <p class="section-desc">Theo dõi toàn hệ thống bằng số liệu: users, listings, booking, lead, hiệu quả vận hành.</p>
-        </div>
-        <div class="placeholder-card">
-          <h3>Sẽ mở rộng tiếp các chỉ số</h3>
-          <div class="placeholder-list">
-            <div class="placeholder-item">Tổng số người dùng</div>
-            <div class="placeholder-item">Số bài đang chờ duyệt</div>
-            <div class="placeholder-item">Listing được xem nhiều nhất</div>
-            <div class="placeholder-item">Tỷ lệ view → booking</div>
-            <div class="placeholder-item">Doanh thu từ gói dịch vụ</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- THANH TOÁN -->
-      <div id="tab-thanh-toan" class="hidden">
-        <div class="content-card section-header">
-          <h1 class="section-title">Thanh toán & gói dịch vụ</h1>
-          <p class="section-desc">Quản lý giao dịch, xác nhận thanh toán, hoàn tiền, bật / tắt gói dịch vụ và điều chỉnh bảng giá.</p>
-        </div>
-        <div class="placeholder-card">
-          <h3>Chức năng sẽ làm tiếp</h3>
-          <div class="placeholder-list">
-            <div class="placeholder-item">Xem giao dịch thanh toán</div>
-            <div class="placeholder-item">Xác nhận thủ công</div>
-            <div class="placeholder-item">Quản lý hoàn tiền</div>
-            <div class="placeholder-item">Bật / tắt gói đăng tin và gói VR</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- THÔNG BÁO -->
-      <div id="tab-thong-bao" class="hidden">
-        <div class="content-card section-header">
-          <h1 class="section-title">Thông báo hệ thống</h1>
-          <p class="section-desc">Gửi thông báo tới user/owner, nhắc lịch booking, thông báo duyệt bài và tạo announcement toàn hệ thống.</p>
-        </div>
-        <div class="placeholder-card">
-          <h3>Chức năng sẽ làm tiếp</h3>
-          <div class="placeholder-list">
-            <div class="placeholder-item">Gửi nhắc lịch booking</div>
-            <div class="placeholder-item">Gửi kết quả duyệt / từ chối bài đăng</div>
-            <div class="placeholder-item">Tạo thông báo toàn hệ thống</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- AUDIT -->
-      <div id="tab-audit" class="hidden">
-        <div class="content-card section-header">
-          <h1 class="section-title">Nhật ký & bảo mật</h1>
-          <p class="section-desc">Theo dõi log thao tác quản trị, lịch sử duyệt bài, bất thường hệ thống và phân quyền admin.</p>
-        </div>
-        <div class="placeholder-card">
-          <h3>Chức năng sẽ làm tiếp</h3>
-          <div class="placeholder-list">
-            <div class="placeholder-item">Lịch sử thay đổi trạng thái listing</div>
-            <div class="placeholder-item">Ai đã duyệt / từ chối bài nào</div>
-            <div class="placeholder-item">Giám sát hành vi bất thường</div>
-            <div class="placeholder-item">Phân quyền admin nhiều cấp</div>
-          </div>
-        </div>
-      </div>
     </section>
   </main>
 
@@ -1093,19 +969,25 @@ function fillAiPreview(analysis) {
 }
 
 async function analyzeAiImage() {
-  const imageUrl = document.getElementById('aiImageUrl').value.trim();
+  const imageUrls = currentAiImages.length
+    ? currentAiImages
+    : document.getElementById('aiImageUrl').value
+        .split('\n')
+        .map(x => x.trim())
+        .filter(Boolean);
 
-  if (!imageUrl) {
-    showToast('Vui lòng dán link ảnh hoặc ảnh trước.');
+  if (!imageUrls.length) {
+    showToast('Vui lòng chọn hoặc dán ít nhất 1 ảnh.');
     return;
   }
 
   try {
-    showToast('Đang phân tích ảnh bằng Gemini...');
+    showToast(`Đang phân tích ${imageUrls.length} ảnh bằng AI...`);
+    setAiVideo('');
 
     const payload = new URLSearchParams({
-      action: 'analyzePropertyImage',
-      imageUrl
+      action: 'analyzePropertyImages',
+      imageUrls: JSON.stringify(imageUrls)
     });
 
     const res = await fetch(APPS_SCRIPT_URL, {
@@ -1116,14 +998,18 @@ async function analyzeAiImage() {
     const json = await res.json();
 
     if (!json.ok) {
-      throw new Error(json.error || 'Không phân tích được ảnh');
+      throw new Error(json.error || 'Không phân tích được bộ ảnh');
     }
 
     currentAiJobId = json.data.jobId;
     currentAiAnalysis = json.data.analysis;
     fillAiPreview(currentAiAnalysis);
 
-    showToast(`AI đã phân tích xong. Job: ${currentAiJobId}`);
+    if (json.data.generatedVideoUrl) {
+      setAiVideo(json.data.generatedVideoUrl);
+    }
+
+    showToast(`AI đã phân tích xong ${imageUrls.length} ảnh.`);
   } catch (error) {
     console.error(error);
     showToast(`Lỗi AI: ${error.message}`);
@@ -1167,41 +1053,161 @@ async function analyzeAiImage() {
     showToast(`Lỗi lưu nháp AI: ${error.message}`);
   }
 }
-let currentAiImageData = '';
-function setAiPreviewImage(src) {
-  const preview = document.getElementById('aiImagePreview');
-  preview.src = src || '';
-  preview.style.display = src ? 'block' : 'none';
+    async function generateAiVideo() {
+  if (!currentAiJobId) {
+    showToast('Bạn cần phân tích AI trước.');
+    return;
+  }
+
+  try {
+    showToast('Đang yêu cầu tạo video AI...');
+
+    const payload = new URLSearchParams({
+      action: 'generateAiVideo',
+      jobId: currentAiJobId
+    });
+
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: payload
+    });
+
+    const json = await res.json();
+
+    if (!json.ok) {
+      throw new Error(json.error || 'Không tạo được video AI');
+    }
+
+    setAiVideo(json.data.generatedVideoUrl || '');
+    showToast('Đã tạo video AI.');
+  } catch (error) {
+    console.error(error);
+    showToast(`Lỗi video AI: ${error.message}`);
+  }
+}
+let currentAiImages = [];
+let currentAiVideoUrl = '';
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
-function applyAiImageData(dataUrl) {
-  currentAiImageData = dataUrl || '';
-  document.getElementById('aiImageUrl').value = currentAiImageData;
-  setAiPreviewImage(currentAiImageData);
+function renderAiPreviewGrid() {
+  const grid = document.getElementById('aiPreviewGrid');
+  if (!grid) return;
+
+  if (!currentAiImages.length) {
+    grid.innerHTML = `
+      <div style="
+        grid-column:1/-1;
+        min-height:180px;
+        border-radius:16px;
+        border:1px dashed rgba(255,255,255,.10);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        color:#9fb0cc;
+        background:rgba(255,255,255,.03);
+      ">
+        Chưa có ảnh nào
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = currentAiImages.map((src, index) => `
+    <div style="
+      position:relative;
+      aspect-ratio:16/10;
+      border-radius:16px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.04);
+    ">
+      <img src="${escapeHtml(src)}" style="width:100%;height:100%;object-fit:cover;display:block;">
+      <button
+        type="button"
+        onclick="removeAiImage(${index})"
+        style="
+          position:absolute;
+          top:8px;
+          right:8px;
+          border:none;
+          border-radius:999px;
+          width:32px;
+          height:32px;
+          background:rgba(0,0,0,.65);
+          color:#fff;
+          font-weight:800;
+          cursor:pointer;
+        "
+      >×</button>
+    </div>
+  `).join('');
+}
+
+function syncAiImageTextarea() {
+  document.getElementById('aiImageUrl').value = currentAiImages.join('\n');
+}
+
+function addAiImage(dataUrl) {
+  if (!dataUrl) return;
+  currentAiImages.push(dataUrl);
+  currentAiImages = currentAiImages.slice(0, 12);
+  syncAiImageTextarea();
+  renderAiPreviewGrid();
+}
+
+function removeAiImage(index) {
+  currentAiImages.splice(index, 1);
+  syncAiImageTextarea();
+  renderAiPreviewGrid();
+}
+
+function setAiVideo(url) {
+  currentAiVideoUrl = url || '';
+  const wrap = document.getElementById('aiVideoWrap');
+  if (!wrap) return;
+
+  if (!currentAiVideoUrl) {
+    wrap.innerHTML = 'Chưa có video AI';
+    return;
+  }
+
+  wrap.innerHTML = `
+    <video controls style="width:100%;max-height:360px;border-radius:12px;display:block;">
+      <source src="${escapeHtml(currentAiVideoUrl)}">
+      Trình duyệt không hỗ trợ video.
+    </video>
+  `;
 }
 
 const aiPasteZone = document.getElementById('aiPasteZone');
 
 aiPasteZone?.addEventListener('paste', function (event) {
-  const items = event.clipboardData?.items || [];
+  const items = Array.from(event.clipboardData?.items || []);
   let foundImage = false;
 
-  for (const item of items) {
+  items.forEach(item => {
     if (item.type && item.type.startsWith('image/')) {
-      foundImage = true;
       const file = item.getAsFile();
-      if (!file) continue;
+      if (!file) return;
+
+      foundImage = true;
 
       const reader = new FileReader();
       reader.onload = function (e) {
         const dataUrl = e.target?.result || '';
-        applyAiImageData(dataUrl);
-        showToast('Đã dán ảnh từ clipboard.');
+        addAiImage(dataUrl);
+        showToast('Đã dán thêm ảnh từ clipboard.');
       };
       reader.readAsDataURL(file);
-      break;
     }
-  }
+  });
 
   if (!foundImage) {
     showToast('Clipboard chưa có ảnh. Hãy copy ảnh trước rồi dán lại.');
@@ -1212,26 +1218,41 @@ aiPasteZone?.addEventListener('click', function () {
   aiPasteZone.focus();
 });
 document.getElementById('aiImageFile')?.addEventListener('change', function (event) {
-  const file = event.target.files?.[0];
-  if (!file) return;
+  const files = Array.from(event.target.files || []);
+  if (!files.length) return;
 
-  const reader = new FileReader();
-  reader.onload = function (e) {
-    applyAiImageData(e.target?.result || '');
-    showToast('Đã nạp ảnh từ máy.');
-  };
+  currentAiImages = [];
+  let loaded = 0;
 
-  reader.readAsDataURL(file);
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const dataUrl = e.target?.result || '';
+      if (dataUrl) currentAiImages.push(dataUrl);
+      loaded++;
+
+      if (loaded === files.length) {
+        currentAiImages = currentAiImages.slice(0, 12);
+        syncAiImageTextarea();
+        renderAiPreviewGrid();
+        showToast(`Đã nạp ${currentAiImages.length} ảnh.`);
+      }
+    };
+    reader.readAsDataURL(file);
+  });
 });
 
 document.getElementById('aiImageUrl')?.addEventListener('input', function () {
-  const value = this.value.trim();
+  const lines = this.value
+    .split('\n')
+    .map(x => x.trim())
+    .filter(Boolean);
 
-  if (value.startsWith('data:image/') || value.startsWith('http')) {
-    setAiPreviewImage(value);
-  } else {
-    setAiPreviewImage('');
-  }
+  currentAiImages = lines
+    .filter(x => x.startsWith('data:image/') || x.startsWith('http'))
+    .slice(0, 12);
+
+  renderAiPreviewGrid();
 });
     function normalizeBookingStatus(status) {
       return String(status || 'new').trim().toLowerCase();
