@@ -811,11 +811,45 @@
     <div class="form-card">
       <h2 class="form-title">Phân tích ảnh bằng AI</h2>
 
-      <div class="field">
-        <label>Link ảnh đầu vào</label>
-        <input id="aiImageUrl" type="text" placeholder="https://...jpg hoặc link ảnh công khai">
-      </div>
+     <div class="field">
+  <label>Chọn ảnh từ máy</label>
+  <input id="aiImageFile" type="file" accept="image/*">
+</div>
+<div class="field">
+  <label>Hoặc dán ảnh bằng Ctrl + V</label>
+  <div
+    id="aiPasteZone"
+    tabindex="0"
+    style="
+      width:100%;
+      min-height:120px;
+      border:1px dashed rgba(247,197,106,.35);
+      border-radius:16px;
+      background:rgba(255,255,255,.03);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:18px;
+      color:#9fb0cc;
+      font-weight:600;
+      outline:none;
+    "
+  >
+    Bấm vào đây rồi nhấn Ctrl + V để dán ảnh
+  </div>
+</div>
+<div class="field">
+  <label>Hoặc dán link ảnh</label>
+  <input id="aiImageUrl" type="text" placeholder="https://...jpg hoặc để trống nếu đã chọn ảnh">
+</div>
 
+<div class="field">
+  <label>Xem trước ảnh</label>
+  <div style="width:100%; aspect-ratio:16/10; border-radius:16px; overflow:hidden; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.04);">
+    <img id="aiImagePreview" src="" alt="Preview AI" style="width:100%; height:100%; object-fit:cover; display:none;">
+  </div>
+</div>
       <div class="btn-row">
         <button class="btn-primary" onclick="analyzeAiImage()">Phân tích AI</button>
         <button class="btn-secondary" onclick="createAiDraft()">Lưu thành căn nhà nháp</button>
@@ -1022,16 +1056,27 @@
     }
 
     function reloadCurrentSection() {
-      if (activeTab === 'dat-lich') {
-        loadBookings();
-        return;
-      }
+  if (activeTab === 'dat-lich') {
+    loadBookings();
+    return;
+  }
 
-      if (activeTab === 'can-nha') {
-        loadProperties();
-        return;
-      }
-let currentAiJobId = '';
+  if (activeTab === 'can-nha') {
+    loadProperties();
+    return;
+  }
+
+  if (activeTab === 'ai-listing') {
+    showToast('Tab AI không cần tải lại riêng.');
+    return;
+  }
+
+  Promise.all([loadBookings(false), loadProperties(false)]).then(() => {
+    updateDashboard();
+    showToast('Đã tải lại dữ liệu');
+  });
+}
+    let currentAiJobId = '';
 let currentAiAnalysis = null;
 
 function fillAiPreview(analysis) {
@@ -1051,16 +1096,23 @@ async function analyzeAiImage() {
   const imageUrl = document.getElementById('aiImageUrl').value.trim();
 
   if (!imageUrl) {
-    showToast('Vui lòng dán link ảnh trước.');
+    showToast('Vui lòng dán link ảnh hoặc ảnh trước.');
     return;
   }
 
   try {
     showToast('Đang phân tích ảnh bằng Gemini...');
 
-    const res = await fetch(
-      `${APPS_SCRIPT_URL}?action=analyzePropertyImage&imageUrl=${encodeURIComponent(imageUrl)}&_t=${Date.now()}`
-    );
+    const payload = new URLSearchParams({
+      action: 'analyzePropertyImage',
+      imageUrl
+    });
+
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: payload
+    });
+
     const json = await res.json();
 
     if (!json.ok) {
@@ -1077,8 +1129,7 @@ async function analyzeAiImage() {
     showToast(`Lỗi AI: ${error.message}`);
   }
 }
-
-async function createAiDraft() {
+    async function createAiDraft() {
   if (!currentAiJobId) {
     showToast('Bạn cần phân tích ảnh trước.');
     return;
@@ -1087,9 +1138,16 @@ async function createAiDraft() {
   try {
     showToast('Đang tạo căn nhà nháp từ AI...');
 
-    const res = await fetch(
-      `${APPS_SCRIPT_URL}?action=createAiDraft&jobId=${encodeURIComponent(currentAiJobId)}&_t=${Date.now()}`
-    );
+    const payload = new URLSearchParams({
+      action: 'createAiDraft',
+      jobId: currentAiJobId
+    });
+
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: payload
+    });
+
     const json = await res.json();
 
     if (!json.ok) {
@@ -1109,12 +1167,72 @@ async function createAiDraft() {
     showToast(`Lỗi lưu nháp AI: ${error.message}`);
   }
 }
-      Promise.all([loadBookings(false), loadProperties(false)]).then(() => {
-        updateDashboard();
-        showToast('Đã tải lại dữ liệu');
-      });
-    }
+let currentAiImageData = '';
+function setAiPreviewImage(src) {
+  const preview = document.getElementById('aiImagePreview');
+  preview.src = src || '';
+  preview.style.display = src ? 'block' : 'none';
+}
 
+function applyAiImageData(dataUrl) {
+  currentAiImageData = dataUrl || '';
+  document.getElementById('aiImageUrl').value = currentAiImageData;
+  setAiPreviewImage(currentAiImageData);
+}
+
+const aiPasteZone = document.getElementById('aiPasteZone');
+
+aiPasteZone?.addEventListener('paste', function (event) {
+  const items = event.clipboardData?.items || [];
+  let foundImage = false;
+
+  for (const item of items) {
+    if (item.type && item.type.startsWith('image/')) {
+      foundImage = true;
+      const file = item.getAsFile();
+      if (!file) continue;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const dataUrl = e.target?.result || '';
+        applyAiImageData(dataUrl);
+        showToast('Đã dán ảnh từ clipboard.');
+      };
+      reader.readAsDataURL(file);
+      break;
+    }
+  }
+
+  if (!foundImage) {
+    showToast('Clipboard chưa có ảnh. Hãy copy ảnh trước rồi dán lại.');
+  }
+});
+
+aiPasteZone?.addEventListener('click', function () {
+  aiPasteZone.focus();
+});
+document.getElementById('aiImageFile')?.addEventListener('change', function (event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    applyAiImageData(e.target?.result || '');
+    showToast('Đã nạp ảnh từ máy.');
+  };
+
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('aiImageUrl')?.addEventListener('input', function () {
+  const value = this.value.trim();
+
+  if (value.startsWith('data:image/') || value.startsWith('http')) {
+    setAiPreviewImage(value);
+  } else {
+    setAiPreviewImage('');
+  }
+});
     function normalizeBookingStatus(status) {
       return String(status || 'new').trim().toLowerCase();
     }
