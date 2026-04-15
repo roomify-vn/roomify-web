@@ -2203,7 +2203,93 @@ select option:hover {
   <div class="toast" id="toast"></div>
 
   <script>
-   const properties = [
+    function normalizeAdminProperty(item) {
+  const contactName =
+    item.agent?.fullName ||
+    item.owner?.fullName ||
+    'Roomify Agent';
+
+  const contactPhone =
+    item.agent?.phone ||
+    item.owner?.phone ||
+    '0900 000 000';
+
+  const thumbnail =
+    item.thumbnail ||
+    (Array.isArray(item.images) && item.images.length ? item.images[0] : '') ||
+    'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80';
+
+  const images =
+    Array.isArray(item.images) && item.images.length
+      ? item.images
+      : [thumbnail];
+
+  const tags = [];
+  if (item.vrLink) tags.push('Có VR');
+  if (item.purpose === 'rent') tags.push('Cho thuê');
+  if (item.purpose === 'sale') tags.push('Mua bán');
+  if (item.type) tags.push(item.type);
+
+  return {
+    id: Number(item.propertyId),
+    propertyCode: item.propertyCode || '',
+    name: item.name || 'Chưa có tên',
+    type: item.type || '',
+    areaGroup: item.areaGroup || '',
+    location: item.location || '',
+    address: item.address || '',
+    price: item.priceText || '',
+    priceValue: Number(item.priceValue || 0),
+    rooms: Number(item.rooms || 0),
+    area: Number(item.area || 0),
+    bathrooms: Number(item.bathrooms || 0),
+    featured: ['published', 'approved'].includes(String(item.status || '').toLowerCase()),
+    hasVR: !!item.vrLink,
+    desc: item.description || 'Chưa có mô tả.',
+    amenities: Array.isArray(item.amenities) ? item.amenities : [],
+    vr: item.vrLink || '',
+    tags,
+    image: thumbnail,
+    images,
+    contact: {
+      name: contactName,
+      phone: contactPhone
+    },
+    status: String(item.status || '').toLowerCase(),
+    source: 'admin'
+  };
+}
+
+async function loadAdminProperties() {
+  try {
+    const res = await fetch(`${APPS_SCRIPT_URL}?action=getProperties&_t=${Date.now()}`);
+    const json = await res.json();
+
+    if (!json.ok) {
+      throw new Error(json.error || 'Không đọc được dữ liệu căn nhà');
+    }
+
+    const adminProperties = (Array.isArray(json.data) ? json.data : [])
+      .filter(item => ['published', 'approved'].includes(String(item.status || '').toLowerCase()))
+      .map(normalizeAdminProperty);
+
+    const usedIds = new Set(baseProperties.map(p => Number(p.id)));
+    const filteredAdmin = adminProperties.filter(p => !usedIds.has(Number(p.id)));
+
+    properties = [...baseProperties, ...filteredAdmin];
+
+    if (!currentProperty && properties.length) {
+      currentProperty = properties[0];
+    }
+  } catch (error) {
+    console.error('Lỗi load admin properties:', error);
+    properties = [...baseProperties];
+    if (!currentProperty && properties.length) {
+      currentProperty = properties[0];
+    }
+  }
+}
+   const baseproperties = [
   {
     id: 1,
     name: 'Căn hộ Lumiere Riverside',
@@ -2820,9 +2906,9 @@ select option:hover {
     contact: { name: 'Phạm Nhật Minh', phone: '0901 745 688' }
   }
 ];
-
+let properties = [...baseProperties];
 let currentPage = 'home';
-let currentProperty = properties[0];
+let currentProperty = baseProperties[0];
 let currentGalleryIndex = 0;
 let featureDetailIndex = -1;
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5elNYXyxacNzB0vvWkkAqbC-v8sK2beBFiG2xf6PPgmswAv9ISkO5W6CJMILbGI42AA/exec';
@@ -3470,10 +3556,18 @@ window.addEventListener('scroll', () => {
     pushHistory: false
   });
 });
-renderQuickDemo();
-fillHouseSelect();
-history.replaceState({ page: 'home' }, '', '#home');
-navigate('home', null, { skipScroll: true, pushHistory: false });
+async function initApp() {
+  await loadAdminProperties();
+
+  renderQuickDemo();
+  fillHouseSelect();
+  renderProperties();
+
+  history.replaceState({ page: 'home' }, '', '#home');
+  navigate('home', null, { skipScroll: true, pushHistory: false });
+}
+
+initApp();
   </script>
  <button id="floatingBackBtn" class="floating-back-btn hidden" onclick="smartBack()" aria-label="Quay lại">
   <span class="back-chevron" aria-hidden="true"></span>
