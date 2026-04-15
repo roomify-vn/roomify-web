@@ -1388,8 +1388,11 @@
                   <span class="status-badge ${propertyStatusClass(item.status)}">${propertyStatusText(item.status)}</span>
                 </td>
                 <td>
-                  <span class="link-action" onclick="fillPropertyFormById('${item.propertyId}')">Sửa</span>
-                </td>
+  <div style="display:flex; flex-direction:column; gap:8px; min-width:120px">
+    <button class="btn-secondary" onclick="editProperty('${item.propertyId}')">Sửa</button>
+    <button class="btn-secondary" onclick="deleteProperty('${item.propertyId}', '${String(item.name || '').replace(/'/g, "\\'")}')">Xóa</button>
+  </div>
+</td>
               </tr>
             `).join('')}
           </tbody>
@@ -1440,13 +1443,68 @@
         tableWrap.innerHTML = `<div class="empty">Lỗi tải dữ liệu: ${error.message}</div>`;
       }
     }
+function editProperty(propertyId) {
+  const item = allProperties.find(x => String(x.propertyId) === String(propertyId));
+  if (!item) {
+    showToast('Không tìm thấy căn nhà để sửa.');
+    return;
+  }
+
+  fillPropertyForm(item);
+  showToast(`Đang sửa: ${item.name}`);
+  setTimeout(() => {
+    document.getElementById('name')?.focus();
+  }, 120);
+}
+
+async function deleteProperty(propertyId, propertyName) {
+  const ok = confirm(`Bạn có chắc muốn xóa căn nhà "${propertyName}" không?`);
+  if (!ok) return;
+
+  try {
+    const payload = new URLSearchParams({
+      action: 'deleteProperty',
+      propertyId
+    });
+
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: payload,
+      mode: 'no-cors'
+    });
+
+    allProperties = allProperties.filter(x => String(x.propertyId) !== String(propertyId));
+    renderProperties();
+    updateDashboard();
+
+    const currentEditingId = document.getElementById('propertyId')?.value?.trim();
+    if (String(currentEditingId) === String(propertyId)) {
+      resetPropertyForm();
+    }
+
+    showToast(`Đã xóa: ${propertyName}`);
+  } catch (error) {
+    console.error(error);
+    showToast('Có lỗi khi xóa căn nhà');
+  }
+}
 
     function fillPropertyFormById(propertyId) {
       const item = allProperties.find(x => String(x.propertyId) === String(propertyId));
       if (!item) return;
       fillPropertyForm(item);
     }
+function normalizeMatterportLink(url) {
+  const value = String(url || '').trim();
+  if (!value) return '';
 
+  const match = value.match(/matterport\.com\/space\/([A-Za-z0-9]+)/i);
+  if (match && match[1]) {
+    return `https://my.matterport.com/show/?m=${match[1]}`;
+  }
+
+  return value;
+}
     async function saveProperty() {
       const propertyId = document.getElementById('propertyId').value.trim();
       const propertyCode = document.getElementById('propertyCode').value.trim();
@@ -1464,7 +1522,9 @@
       const status = document.getElementById('propertyStatus').value;
       const ownerId = document.getElementById('ownerId').value.trim();
       const agentId = document.getElementById('agentId').value.trim();
-      const vrLink = document.getElementById('vrLink').value.trim();
+    const vrLink = normalizeMatterportLink(
+  document.getElementById('vrLink').value.trim()
+);
       const thumbnail = document.getElementById('thumbnail').value.trim();
       const description = document.getElementById('description').value.trim();
 
