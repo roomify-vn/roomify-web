@@ -510,7 +510,7 @@
         <button class="nav-btn active" data-tab="tong-quan" onclick="switchTab('tong-quan')">Tổng quan</button>
         <button class="nav-btn" data-tab="dat-lich" onclick="switchTab('dat-lich')">Đặt lịch & lead</button>
         <button class="nav-btn" data-tab="can-nha" onclick="switchTab('can-nha')">Quản lý căn nhà</button>
-        <button class="nav-btn" data-tab="ai-listing" onclick="switchTab('ai-listing')">AI tạo listing</button>
+      <button class="nav-btn" data-tab="ai-listing" onclick="switchTab('ai-listing')">Tạo video từ ảnh</button>
       </div>
     </aside>
 
@@ -565,13 +565,13 @@
           </div>
 
           <div class="placeholder-card">
-            <h3>Ghi chú triển khai</h3>
-            <p>
-              Các tab <strong>Người dùng</strong>, <strong>Kiểm duyệt</strong>, <strong>Media / VR</strong>,
-              <strong>Danh mục</strong>, <strong>Báo cáo</strong>, <strong>Thanh toán</strong>,
-              <strong>Thông báo</strong>, <strong>Nhật ký</strong> đã được dựng khung giao diện để mở rộng tiếp.
-            </p>
-          </div>
+  <h3>Ghi chú triển khai</h3>
+  <p>
+    Hệ thống hiện tập trung vào 4 khu vực chính:
+    <strong>Tổng quan</strong>, <strong>Đặt lịch & lead</strong>,
+    <strong>Quản lý căn nhà</strong> và <strong>Tạo video từ ảnh</strong>.
+  </p>
+</div>
         </div>
       </div>
 
@@ -792,15 +792,15 @@
       </div>
 <div id="tab-ai-listing" class="hidden">
   <div class="content-card section-header">
-    <h1 class="section-title">AI tạo listing</h1>
-    <p class="section-desc">
-      Dán link ảnh bất động sản để Gemini phân tích và tự tạo nháp listing cho Roomify.
-    </p>
+   <h1 class="section-title">Tạo video từ ảnh</h1>
+<p class="section-desc">
+  Tải 1 đến 3 ảnh bất động sản để hệ thống tạo video AI trực tiếp.
+</p>
   </div>
 
   <div class="panel-wrap">
     <div class="form-card">
-      <h2 class="form-title">Phân tích ảnh bằng AI</h2>
+     <h2 class="form-title">Tạo video từ ảnh</h2>
 
      <div class="field">
   <label>Chọn ảnh từ máy</label>
@@ -843,16 +843,10 @@
     gap:12px;
   "></div>
 </div>
-     <div class="btn-row">
-  <button class="btn-primary" onclick="analyzeAiImage()">Phân tích AI</button>
-  <button class="btn-secondary" onclick="generateAiVideo()">Tạo video AI</button>
-  <button class="btn-secondary" onclick="createAiDraft()">Lưu thành căn nhà nháp</button>
+<div class="btn-row">
+  <button class="btn-primary" onclick="createVideoFromImages()">Tạo video</button>
 </div>
-
-      <div class="field" style="margin-top:16px;">
-        <label>Xem trước JSON AI</label>
-        <textarea id="aiJsonPreview" readonly style="min-height:260px;"></textarea>
-      </div>
+    
       <div class="field" style="margin-top:16px;">
   <label>Video AI</label>
   <div id="aiVideoWrap" style="
@@ -872,18 +866,7 @@
   </div>
 </div>
     </div>
-    <div class="panel-card">
-      <h2 class="form-title">Tóm tắt AI</h2>
-      <div class="placeholder-list">
-        <div class="placeholder-item"><strong>Tên gợi ý:</strong> <span id="aiPreviewTitle">—</span></div>
-        <div class="placeholder-item"><strong>Loại nhà:</strong> <span id="aiPreviewType">—</span></div>
-        <div class="placeholder-item"><strong>Khu vực:</strong> <span id="aiPreviewArea">—</span></div>
-        <div class="placeholder-item"><strong>Vị trí:</strong> <span id="aiPreviewLocation">—</span></div>
-        <div class="placeholder-item"><strong>Số phòng:</strong> <span id="aiPreviewRooms">—</span></div>
-        <div class="placeholder-item"><strong>Diện tích:</strong> <span id="aiPreviewAreaValue">—</span></div>
-        <div class="placeholder-item"><strong>Mô tả:</strong> <span id="aiPreviewDesc">—</span></div>
-      </div>
-    </div>
+   
   </div>
 </div>
     </section>
@@ -943,7 +926,7 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwPLqnxdrub8s3s
   }
 
   if (activeTab === 'ai-listing') {
-    showToast('Tab AI không cần tải lại riêng.');
+    showToast('Tab video không cần tải lại riêng.');
     return;
   }
 
@@ -953,22 +936,8 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwPLqnxdrub8s3s
   });
 }
     let currentAiJobId = '';
-let currentAiAnalysis = null;
 
-function fillAiPreview(analysis) {
-  document.getElementById('aiJsonPreview').value = JSON.stringify(analysis, null, 2);
-  document.getElementById('aiPreviewTitle').textContent = analysis.title || '—';
-  document.getElementById('aiPreviewType').textContent = analysis.propertyType || '—';
-  document.getElementById('aiPreviewArea').textContent = analysis.areaGroup || '—';
-  document.getElementById('aiPreviewLocation').textContent = analysis.location || '—';
-  document.getElementById('aiPreviewRooms').textContent =
-    `${analysis.rooms || '—'} phòng • ${analysis.bathrooms || '—'} WC`;
-  document.getElementById('aiPreviewAreaValue').textContent =
-    analysis.area ? `${analysis.area} m²` : '—';
-  document.getElementById('aiPreviewDesc').textContent = analysis.description || '—';
-}
-
-async function analyzeAiImage() {
+    async function createVideoFromImages() {
   const imageUrls = currentAiImages.length
     ? currentAiImages
     : document.getElementById('aiImageUrl').value
@@ -982,109 +951,53 @@ async function analyzeAiImage() {
   }
 
   try {
-    showToast(`Đang phân tích ${imageUrls.length} ảnh bằng AI...`);
     setAiVideo('');
+    showToast('Đang tạo job video...');
 
-    const payload = new URLSearchParams({
-      action: 'analyzePropertyImages',
+    const payloadCreate = new URLSearchParams({
+      action: 'createVideoJob',
       imageUrls: JSON.stringify(imageUrls)
     });
 
-    const res = await fetch(APPS_SCRIPT_URL, {
+    const resCreate = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      body: payload
+      body: payloadCreate
     });
 
-    const json = await res.json();
+    const jsonCreate = await resCreate.json();
 
-    if (!json.ok) {
-      throw new Error(json.error || 'Không phân tích được bộ ảnh');
+    if (!jsonCreate.ok) {
+      throw new Error(jsonCreate.error || 'Không tạo được job video');
     }
 
-    currentAiJobId = json.data.jobId;
-    currentAiAnalysis = json.data.analysis;
-    fillAiPreview(currentAiAnalysis);
+    currentAiJobId = jsonCreate.data.jobId;
 
-    if (json.data.generatedVideoUrl) {
-      setAiVideo(json.data.generatedVideoUrl);
-    }
+    showToast('Đang render video AI...');
 
-    showToast(`AI đã phân tích xong ${imageUrls.length} ảnh.`);
-  } catch (error) {
-    console.error(error);
-    showToast(`Lỗi AI: ${error.message}`);
-  }
-}
-    async function createAiDraft() {
-  if (!currentAiJobId) {
-    showToast('Bạn cần phân tích ảnh trước.');
-    return;
-  }
-
-  try {
-    showToast('Đang tạo căn nhà nháp từ AI...');
-
-    const payload = new URLSearchParams({
-      action: 'createAiDraft',
-      jobId: currentAiJobId
-    });
-
-    const res = await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      body: payload
-    });
-
-    const json = await res.json();
-
-    if (!json.ok) {
-      throw new Error(json.error || 'Không tạo được căn nhà nháp');
-    }
-
-    await loadProperties(false);
-    updateDashboard();
-
-    const propertyId = json.data.propertyId;
-    switchTab('can-nha');
-    fillPropertyFormById(propertyId);
-
-    showToast(`Đã tạo căn nhà nháp AI: ${json.data.propertyCode}`);
-  } catch (error) {
-    console.error(error);
-    showToast(`Lỗi lưu nháp AI: ${error.message}`);
-  }
-}
-    async function generateAiVideo() {
-  if (!currentAiJobId) {
-    showToast('Bạn cần phân tích AI trước.');
-    return;
-  }
-
-  try {
-    showToast('Đang yêu cầu tạo video AI...');
-
-    const payload = new URLSearchParams({
+    const payloadVideo = new URLSearchParams({
       action: 'generateAiVideo',
       jobId: currentAiJobId
     });
 
-    const res = await fetch(APPS_SCRIPT_URL, {
+    const resVideo = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      body: payload
+      body: payloadVideo
     });
 
-    const json = await res.json();
+    const jsonVideo = await resVideo.json();
 
-    if (!json.ok) {
-      throw new Error(json.error || 'Không tạo được video AI');
+    if (!jsonVideo.ok) {
+      throw new Error(jsonVideo.error || 'Không tạo được video');
     }
 
-    setAiVideo(json.data.generatedVideoUrl || '');
-    showToast('Đã tạo video AI.');
+    setAiVideo(jsonVideo.data.generatedVideoUrl || '');
+    showToast('Đã tạo video xong.');
   } catch (error) {
     console.error(error);
-    showToast(`Lỗi video AI: ${error.message}`);
+    showToast(`Lỗi video: ${error.message}`);
   }
 }
+  
 let currentAiImages = [];
 let currentAiVideoUrl = '';
 function escapeHtml(value) {
