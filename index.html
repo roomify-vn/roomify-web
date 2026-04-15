@@ -2268,17 +2268,49 @@ async function loadAdminProperties() {
       throw new Error(json.error || 'Không đọc được dữ liệu căn nhà');
     }
 
-    const adminProperties = (Array.isArray(json.data) ? json.data : [])
-      .filter(item => ['published', 'approved'].includes(String(item.status || '').toLowerCase()))
-      .map(normalizeAdminProperty);
+    const adminRows = Array.isArray(json.data) ? json.data : [];
+    const adminMap = new Map();
 
-    const usedIds = new Set(baseProperties.map(p => Number(p.id)));
-    const filteredAdmin = adminProperties.filter(p => !usedIds.has(Number(p.id)));
+    adminRows.forEach(item => {
+      const normalized = normalizeAdminProperty(item);
+      adminMap.set(Number(normalized.id), normalized);
+    });
 
-    properties = [...baseProperties, ...filteredAdmin];
+    const mergedBase = baseProperties
+      .map(base => {
+        const adminVersion = adminMap.get(Number(base.id));
+
+        if (!adminVersion) return base;
+
+        if (!['published', 'approved'].includes(String(adminVersion.status || '').toLowerCase())) {
+          return null;
+        }
+
+        return {
+          ...base,
+          ...adminVersion,
+          contact: adminVersion.contact || base.contact,
+          images: adminVersion.images?.length ? adminVersion.images : base.images,
+          amenities: adminVersion.amenities?.length ? adminVersion.amenities : base.amenities
+        };
+      })
+      .filter(Boolean);
+
+    const extraAdmin = Array.from(adminMap.values()).filter(item => {
+      const id = Number(item.id);
+      return !baseProperties.some(base => Number(base.id) === id) &&
+             ['published', 'approved'].includes(String(item.status || '').toLowerCase());
+    });
+
+    properties = [...mergedBase, ...extraAdmin];
 
     if (!currentProperty && properties.length) {
       currentProperty = properties[0];
+    }
+
+    if (currentProperty) {
+      const refreshedCurrent = properties.find(p => Number(p.id) === Number(currentProperty.id));
+      currentProperty = refreshedCurrent || properties[0] || null;
     }
   } catch (error) {
     console.error('Lỗi load admin properties:', error);
@@ -3311,6 +3343,11 @@ window.__currentGallery = gallery;
 function fillHouseSelect() {
   const select = document.getElementById('selectedHouse');
   if (!select) return;
+
+  if (!properties.length) {
+    select.innerHTML = `<option value="">Hiện chưa có căn nhà nào</option>`;
+    return;
+  }
 
   select.innerHTML =
     `<option value="">Chọn căn nhà muốn xem</option>` +
