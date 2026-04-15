@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Roomify Admin - Bookings</title>
+  <title>Roomify Admin</title>
   <style>
     :root{
       --bg:#07111f;
@@ -14,9 +14,14 @@
       --gold:#f7c56a;
       --line:rgba(255,255,255,0.10);
       --shadow:0 18px 40px rgba(0,0,0,.25);
+      --ok:#6de2b3;
+      --warn:#ffe7b6;
+      --danger:#ffb3b3;
+      --info:#9fd4ff;
     }
 
     *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
     body{
       margin:0;
       font-family:Inter,system-ui,sans-serif;
@@ -29,21 +34,21 @@
     }
 
     .container{
-      width:min(1280px, calc(100% - 32px));
+      width:min(1440px, calc(100% - 32px));
       margin:0 auto;
     }
 
     .topbar{
       position:sticky;
       top:0;
-      z-index:20;
+      z-index:30;
       backdrop-filter:blur(10px);
-      background:rgba(6,16,29,.88);
+      background:rgba(6,16,29,.92);
       border-bottom:1px solid var(--line);
     }
 
     .topbar-inner{
-      min-height:76px;
+      min-height:78px;
       display:flex;
       align-items:center;
       justify-content:space-between;
@@ -51,29 +56,40 @@
     }
 
     .brand{
-      font-size:28px;
+      font-size:30px;
       font-weight:900;
       color:var(--gold);
+      line-height:1;
     }
 
     .sub{
       color:var(--muted);
       font-size:14px;
-      margin-top:4px;
+      margin-top:6px;
     }
 
-    .section{
-      padding:28px 0 40px;
+    .top-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
     }
 
-    .grid{
+    .admin-layout{
       display:grid;
-      grid-template-columns:repeat(4, 1fr);
-      gap:16px;
-      margin-bottom:20px;
+      grid-template-columns: 260px 1fr;
+      gap:18px;
+      padding:20px 0 40px;
+      align-items:start;
     }
 
-    .card{
+    .sidebar,
+    .content-card,
+    .stat-card,
+    .toolbar,
+    .table-card,
+    .panel-card,
+    .form-card,
+    .placeholder-card{
       background:
         linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.025)),
         linear-gradient(135deg, rgba(247,197,106,.08), rgba(216,139,31,.03) 45%, rgba(255,255,255,.015) 100%);
@@ -82,7 +98,91 @@
       box-shadow:var(--shadow);
     }
 
-    .stat{
+    .sidebar{
+      padding:14px;
+      position:sticky;
+      top:98px;
+    }
+
+    .nav-title{
+      color:#ffe7b6;
+      font-size:13px;
+      font-weight:800;
+      margin:8px 10px 10px;
+      letter-spacing:.2px;
+      text-transform:uppercase;
+    }
+
+    .nav-list{
+      display:grid;
+      gap:8px;
+    }
+
+    .nav-btn{
+      width:100%;
+      text-align:left;
+      border:none;
+      cursor:pointer;
+      padding:14px 14px;
+      border-radius:16px;
+      background:rgba(255,255,255,.04);
+      color:#eef4ff;
+      font-weight:700;
+      transition:.2s ease;
+      border:1px solid rgba(255,255,255,.05);
+    }
+
+    .nav-btn:hover{
+      transform:translateY(-1px);
+      background:rgba(255,255,255,.06);
+    }
+
+    .nav-btn.active{
+      color:#1e1200;
+      background:linear-gradient(135deg, #ffd992, #f2b142 60%, #d4871f);
+      box-shadow:0 10px 26px rgba(242,177,66,.24);
+      border-color:transparent;
+    }
+
+    .content{
+      display:grid;
+      gap:18px;
+    }
+
+    .section-header{
+      padding:18px 20px;
+    }
+
+    .section-title{
+      margin:0;
+      font-size:28px;
+      font-weight:900;
+      color:#fff;
+    }
+
+    .section-desc{
+      margin:8px 0 0;
+      color:var(--muted);
+      line-height:1.7;
+    }
+
+    .hidden{
+      display:none !important;
+    }
+
+    .grid-4{
+      display:grid;
+      grid-template-columns:repeat(4, 1fr);
+      gap:16px;
+    }
+
+    .grid-3{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:16px;
+    }
+
+    .stat-card{
       padding:20px;
     }
 
@@ -93,25 +193,95 @@
     }
 
     .stat-value{
-      font-size:28px;
+      font-size:30px;
       font-weight:900;
       color:#ffd89a;
     }
 
-    .toolbar{
-      padding:18px;
-      display:grid;
-      grid-template-columns:1.2fr .8fr .8fr auto;
-      gap:12px;
-      align-items:center;
-      margin-bottom:18px;
+    .stat-sub{
+      margin-top:8px;
+      color:var(--muted);
+      font-size:13px;
     }
 
-    input, select, button, textarea{
+    .toolbar{
+      padding:16px;
+      display:grid;
+      gap:12px;
+      align-items:center;
+    }
+
+    .toolbar-bookings{
+      grid-template-columns:1.2fr .8fr .8fr auto;
+    }
+
+    .toolbar-properties{
+      grid-template-columns:1.2fr .8fr .8fr auto;
+    }
+
+    .panel-wrap{
+      display:grid;
+      grid-template-columns: 430px 1fr;
+      gap:18px;
+      align-items:start;
+    }
+
+    .form-card,
+    .table-card,
+    .panel-card,
+    .placeholder-card{
+      padding:18px;
+      overflow:auto;
+    }
+
+    .thumb-preview{
+      width:100%;
+      aspect-ratio:16/10;
+      border-radius:16px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.04);
+      margin-bottom:14px;
+    }
+
+    .thumb-preview img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .form-title{
+      margin:0 0 14px;
+      font-size:22px;
+      font-weight:800;
+    }
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-bottom:12px;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin-bottom:12px;
+    }
+
+    .field label{
+      font-size:13px;
+      color:#ffe7b6;
+      font-weight:700;
+    }
+
+    input, select, textarea, button{
       font:inherit;
     }
 
-    input, select{
+    input, select, textarea{
       width:100%;
       padding:14px 14px;
       border-radius:16px;
@@ -119,6 +289,11 @@
       background:rgba(255,255,255,.05);
       color:#fff;
       outline:none;
+    }
+
+    textarea{
+      min-height:110px;
+      resize:vertical;
     }
 
     select option{
@@ -150,9 +325,11 @@
       border:1px solid rgba(255,255,255,.08);
     }
 
-    .table-card{
-      padding:18px;
-      overflow:auto;
+    .btn-row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
     }
 
     table{
@@ -200,11 +377,17 @@
       background:rgba(255,255,255,.05);
     }
 
-    .status-new{ color:#ffe7b6; border-color:rgba(247,197,106,.28); }
-    .status-contacted{ color:#9fd4ff; border-color:rgba(120,180,255,.28); }
-    .status-scheduled{ color:#9ff0c6; border-color:rgba(109,226,179,.28); }
-    .status-done{ color:#b8ffcc; border-color:rgba(120,255,160,.28); }
-    .status-canceled{ color:#ffb3b3; border-color:rgba(255,120,120,.28); }
+    .status-moi{ color:var(--warn); border-color:rgba(247,197,106,.28); }
+    .status-da-lien-he{ color:var(--info); border-color:rgba(120,180,255,.28); }
+    .status-da-hen{ color:#9ff0c6; border-color:rgba(109,226,179,.28); }
+    .status-hoan-tat{ color:#b8ffcc; border-color:rgba(120,255,160,.28); }
+    .status-da-huy{ color:var(--danger); border-color:rgba(255,120,120,.28); }
+
+    .status-hien-thi{ color:#b8ffcc; border-color:rgba(120,255,160,.28); }
+    .status-ban-nhap{ color:var(--warn); border-color:rgba(247,197,106,.28); }
+    .status-an{ color:var(--danger); border-color:rgba(255,120,120,.28); }
+    .status-cho-duyet{ color:var(--info); border-color:rgba(120,180,255,.28); }
+    .status-tu-choi{ color:#ffb3b3; border-color:rgba(255,120,120,.28); }
 
     .row-actions{
       display:flex;
@@ -216,6 +399,37 @@
     .row-actions select,
     .row-actions button{
       width:100%;
+    }
+
+    .link-action{
+      color:#ffd89a;
+      cursor:pointer;
+      font-weight:800;
+    }
+
+    .placeholder-card h3{
+      margin:0 0 12px;
+      font-size:20px;
+    }
+
+    .placeholder-card p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.8;
+    }
+
+    .placeholder-list{
+      margin-top:14px;
+      display:grid;
+      gap:10px;
+    }
+
+    .placeholder-item{
+      padding:14px;
+      border-radius:16px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.06);
+      color:#eef4ff;
     }
 
     .empty{
@@ -245,6 +459,7 @@
       transform:translateY(10px);
       pointer-events:none;
       transition:.25s ease;
+      z-index:50;
     }
 
     .toast.show{
@@ -252,9 +467,26 @@
       transform:translateY(0);
     }
 
+    @media (max-width:1200px){
+      .panel-wrap{
+        grid-template-columns:1fr;
+      }
+    }
+
     @media (max-width:1100px){
-      .grid,
-      .toolbar{
+      .admin-layout{
+        grid-template-columns:1fr;
+      }
+
+      .sidebar{
+        position:static;
+      }
+
+      .grid-4,
+      .grid-3,
+      .toolbar-bookings,
+      .toolbar-properties,
+      .form-grid{
         grid-template-columns:1fr;
       }
     }
@@ -265,62 +497,456 @@
     <div class="container topbar-inner">
       <div>
         <div class="brand">Roomify Admin</div>
-        <div class="sub">Quản lý bookings</div>
+        <div class="sub">Trang quản trị tổng hợp hệ thống Roomify</div>
       </div>
-      <button class="btn-secondary" onclick="loadBookings()">Tải lại dữ liệu</button>
+      <div class="top-actions">
+        <button class="btn-secondary" onclick="reloadCurrentSection()">Tải lại dữ liệu</button>
+      </div>
     </div>
   </header>
 
-  <main class="section">
-    <div class="container">
-      <div class="grid">
-        <div class="card stat">
-          <div class="stat-label">Tổng bookings</div>
-          <div class="stat-value" id="statTotal">0</div>
+  <main class="container admin-layout">
+    <aside class="sidebar">
+      <div class="nav-title">Quản trị hệ thống</div>
+      <div class="nav-list">
+        <button class="nav-btn active" data-tab="tong-quan" onclick="switchTab('tong-quan')">Tổng quan</button>
+        <button class="nav-btn" data-tab="dat-lich" onclick="switchTab('dat-lich')">Đặt lịch & lead</button>
+        <button class="nav-btn" data-tab="can-nha" onclick="switchTab('can-nha')">Quản lý căn nhà</button>
+        <button class="nav-btn" data-tab="nguoi-dung" onclick="switchTab('nguoi-dung')">Quản lý người dùng</button>
+        <button class="nav-btn" data-tab="kiem-duyet" onclick="switchTab('kiem-duyet')">Kiểm duyệt bất động sản</button>
+        <button class="nav-btn" data-tab="media-vr" onclick="switchTab('media-vr')">Media / 360 / VR</button>
+        <button class="nav-btn" data-tab="danh-muc" onclick="switchTab('danh-muc')">Danh mục hệ thống</button>
+        <button class="nav-btn" data-tab="bao-cao" onclick="switchTab('bao-cao')">Báo cáo quản trị</button>
+        <button class="nav-btn" data-tab="thanh-toan" onclick="switchTab('thanh-toan')">Thanh toán & gói dịch vụ</button>
+        <button class="nav-btn" data-tab="thong-bao" onclick="switchTab('thong-bao')">Thông báo hệ thống</button>
+        <button class="nav-btn" data-tab="audit" onclick="switchTab('audit')">Nhật ký & bảo mật</button>
+      </div>
+    </aside>
+
+    <section class="content">
+      <!-- TỔNG QUAN -->
+      <div id="tab-tong-quan">
+        <div class="content-card section-header">
+          <h1 class="section-title">Tổng quan</h1>
+          <p class="section-desc">Theo dõi nhanh số liệu vận hành của Roomify: đặt lịch, căn nhà, trạng thái hiển thị và tình hình xử lý.</p>
         </div>
-        <div class="card stat">
-          <div class="stat-label">Booking mới</div>
-          <div class="stat-value" id="statNew">0</div>
+
+        <div class="grid-4">
+          <div class="stat-card">
+            <div class="stat-label">Tổng số lượt đặt lịch</div>
+            <div class="stat-value" id="dashTotalBookings">0</div>
+            <div class="stat-sub">Toàn hệ thống</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Lượt đặt lịch mới</div>
+            <div class="stat-value" id="dashNewBookings">0</div>
+            <div class="stat-sub">Chưa xử lý</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Tổng số căn nhà</div>
+            <div class="stat-value" id="dashTotalProperties">0</div>
+            <div class="stat-sub">Dữ liệu trong hệ thống</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Căn đang hiển thị</div>
+            <div class="stat-value" id="dashPublishedProperties">0</div>
+            <div class="stat-sub">Đang public</div>
+          </div>
         </div>
-        <div class="card stat">
-          <div class="stat-label">Đã liên hệ</div>
-          <div class="stat-value" id="statContacted">0</div>
-        </div>
-        <div class="card stat">
-          <div class="stat-label">Đã hẹn / hoàn tất</div>
-          <div class="stat-value" id="statDone">0</div>
+
+        <div class="grid-3">
+          <div class="placeholder-card">
+            <h3>Đặt lịch nổi bật</h3>
+            <div class="placeholder-list">
+              <div class="placeholder-item">Số đã liên hệ: <strong id="dashContactedBookings">0</strong></div>
+              <div class="placeholder-item">Số đã hẹn lịch: <strong id="dashScheduledBookings">0</strong></div>
+              <div class="placeholder-item">Số hoàn tất / đã hủy: <strong id="dashClosedBookings">0</strong></div>
+            </div>
+          </div>
+
+          <div class="placeholder-card">
+            <h3>Tình trạng listing</h3>
+            <div class="placeholder-list">
+              <div class="placeholder-item">Bản nháp: <strong id="dashDraftProperties">0</strong></div>
+              <div class="placeholder-item">Đã ẩn: <strong id="dashHiddenProperties">0</strong></div>
+              <div class="placeholder-item">Chờ duyệt / bị từ chối: <strong id="dashModerationPlaceholder">0</strong></div>
+            </div>
+          </div>
+
+          <div class="placeholder-card">
+            <h3>Ghi chú triển khai</h3>
+            <p>
+              Các tab <strong>Người dùng</strong>, <strong>Kiểm duyệt</strong>, <strong>Media / VR</strong>,
+              <strong>Danh mục</strong>, <strong>Báo cáo</strong>, <strong>Thanh toán</strong>,
+              <strong>Thông báo</strong>, <strong>Nhật ký</strong> đã được dựng khung giao diện để mở rộng tiếp.
+            </p>
+          </div>
         </div>
       </div>
 
-      <div class="card toolbar">
-        <input id="searchInput" type="text" placeholder="Tìm theo tên khách, điện thoại, email, căn nhà..." />
-        <select id="statusFilter">
-          <option value="all">Tất cả trạng thái</option>
-          <option value="new">new</option>
-          <option value="contacted">contacted</option>
-          <option value="scheduled">scheduled</option>
-          <option value="done">done</option>
-          <option value="canceled">canceled</option>
-        </select>
-        <select id="sourceFilter">
-          <option value="all">Tất cả nguồn</option>
-          <option value="website">website</option>
-        </select>
-        <button class="btn-primary" onclick="renderBookings()">Lọc dữ liệu</button>
+      <!-- ĐẶT LỊCH -->
+      <div id="tab-dat-lich" class="hidden">
+        <div class="content-card section-header">
+          <h1 class="section-title">Đặt lịch & lead</h1>
+          <p class="section-desc">Xem toàn bộ lịch hẹn, chỉnh trạng thái xử lý, phân công người phụ trách và ghi chú vận hành.</p>
+        </div>
+
+        <div class="grid-4">
+          <div class="stat-card">
+            <div class="stat-label">Tổng đặt lịch</div>
+            <div class="stat-value" id="statTotal">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Mới</div>
+            <div class="stat-value" id="statNew">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Đã liên hệ</div>
+            <div class="stat-value" id="statContacted">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Đã hẹn / hoàn tất</div>
+            <div class="stat-value" id="statDone">0</div>
+          </div>
+        </div>
+
+        <div class="toolbar toolbar-bookings">
+          <input id="searchInput" type="text" placeholder="Tìm theo tên khách, điện thoại, email, căn nhà..." />
+          <select id="statusFilter">
+            <option value="all">Tất cả trạng thái</option>
+            <option value="new">Mới</option>
+            <option value="contacted">Đã liên hệ</option>
+            <option value="scheduled">Đã hẹn lịch</option>
+            <option value="done">Hoàn tất</option>
+            <option value="canceled">Đã hủy</option>
+          </select>
+          <select id="sourceFilter">
+            <option value="all">Tất cả nguồn</option>
+            <option value="website">Website</option>
+          </select>
+          <button class="btn-primary" onclick="renderBookings()">Lọc dữ liệu</button>
+        </div>
+
+        <div class="table-card">
+          <div id="tableWrap" class="loading">Đang tải dữ liệu đặt lịch...</div>
+        </div>
       </div>
 
-      <div class="card table-card">
-        <div id="tableWrap" class="loading">Đang tải dữ liệu bookings...</div>
+      <!-- CĂN NHÀ -->
+      <div id="tab-can-nha" class="hidden">
+        <div class="content-card section-header">
+          <h1 class="section-title">Quản lý căn nhà</h1>
+          <p class="section-desc">Thêm mới, sửa thông tin, thay đổi trạng thái hiển thị, chuẩn bị cho kiểm duyệt listing và quản lý lead theo từng bài đăng.</p>
+        </div>
+
+        <div class="panel-wrap">
+          <div class="form-card">
+            <h2 class="form-title" id="propertyFormTitle">Thêm căn nhà mới</h2>
+
+            <div class="thumb-preview" id="thumbPreview">
+              <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80" alt="Ảnh xem trước">
+            </div>
+
+            <input type="hidden" id="propertyId">
+
+            <div class="form-grid">
+              <div class="field">
+                <label>Mã căn nhà</label>
+                <input id="propertyCode" type="text" placeholder="RM001">
+              </div>
+              <div class="field">
+                <label>Tên căn nhà</label>
+                <input id="name" type="text" placeholder="Căn hộ Lumiere Riverside">
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="field">
+                <label>Loại bất động sản</label>
+                <select id="type">
+                  <option value="">Chọn loại nhà</option>
+                  <option value="Căn hộ">Căn hộ</option>
+                  <option value="Nhà phố">Nhà phố</option>
+                  <option value="Studio">Studio</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Khu vực</label>
+                <select id="areaGroup">
+                  <option value="">Chọn khu vực</option>
+                  <option value="TP.HCM">TP.HCM</option>
+                  <option value="Hà Nội">Hà Nội</option>
+                  <option value="Đà Nẵng">Đà Nẵng</option>
+                  <option value="Huế">Huế</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Địa điểm ngắn</label>
+              <input id="location" type="text" placeholder="Thủ Đức, TP.HCM">
+            </div>
+
+            <div class="field">
+              <label>Địa chỉ chi tiết</label>
+              <input id="address" type="text" placeholder="Số nhà, đường, phường/xã, quận/huyện">
+            </div>
+
+            <div class="form-grid">
+              <div class="field">
+                <label>Giá hiển thị</label>
+                <input id="priceText" type="text" placeholder="12 triệu/tháng hoặc 4.6 tỷ">
+              </div>
+              <div class="field">
+                <label>Giá trị số</label>
+                <input id="priceValue" type="number" step="0.1" placeholder="12 hoặc 4.6">
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="field">
+                <label>Mục đích</label>
+                <select id="purpose">
+                  <option value="">Chọn mục đích</option>
+                  <option value="rent">Cho thuê</option>
+                  <option value="sale">Bán</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Trạng thái bài đăng</label>
+                <select id="propertyStatus">
+                  <option value="draft">Bản nháp</option>
+                  <option value="published">Đang hiển thị</option>
+                  <option value="hidden">Đã ẩn</option>
+                  <option value="pending">Chờ duyệt</option>
+                  <option value="approved">Đã duyệt</option>
+                  <option value="rejected">Từ chối</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="field">
+                <label>Số phòng ngủ</label>
+                <input id="rooms" type="number" placeholder="2">
+              </div>
+              <div class="field">
+                <label>Số WC</label>
+                <input id="bathrooms" type="number" placeholder="2">
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Diện tích (m²)</label>
+              <input id="area" type="number" placeholder="68">
+            </div>
+
+            <div class="form-grid">
+              <div class="field">
+                <label>Mã chủ nhà</label>
+                <input id="ownerId" type="text" placeholder="C001">
+              </div>
+              <div class="field">
+                <label>Mã môi giới</label>
+                <input id="agentId" type="text" placeholder="C002">
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Link 360 / VR</label>
+              <input id="vrLink" type="text" placeholder="https://my.matterport.com/show/?m=...">
+            </div>
+
+            <div class="field">
+              <label>Ảnh đại diện</label>
+              <input id="thumbnail" type="text" placeholder="https://...jpg">
+            </div>
+
+            <div class="field">
+              <label>Mô tả căn nhà</label>
+              <textarea id="description" placeholder="Nhập mô tả căn nhà..."></textarea>
+            </div>
+
+            <div class="btn-row">
+              <button class="btn-primary" onclick="saveProperty()">Lưu căn nhà</button>
+              <button class="btn-secondary" onclick="resetPropertyForm()">Xóa form</button>
+            </div>
+          </div>
+
+          <div>
+            <div class="toolbar toolbar-properties">
+              <input id="propertySearchInput" type="text" placeholder="Tìm theo tên nhà, địa điểm, mã căn..." />
+              <select id="typeFilterProperty">
+                <option value="all">Tất cả loại nhà</option>
+                <option value="Căn hộ">Căn hộ</option>
+                <option value="Nhà phố">Nhà phố</option>
+                <option value="Studio">Studio</option>
+              </select>
+              <select id="propertyStatusFilter">
+                <option value="all">Tất cả trạng thái</option>
+                <option value="published">Đang hiển thị</option>
+                <option value="draft">Bản nháp</option>
+                <option value="hidden">Đã ẩn</option>
+                <option value="pending">Chờ duyệt</option>
+                <option value="approved">Đã duyệt</option>
+                <option value="rejected">Từ chối</option>
+              </select>
+              <button class="btn-primary" onclick="renderProperties()">Lọc dữ liệu</button>
+            </div>
+
+            <div class="table-card">
+              <div id="propertyTableWrap" class="loading">Đang tải dữ liệu căn nhà...</div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+
+      <!-- NGƯỜI DÙNG -->
+      <div id="tab-nguoi-dung" class="hidden">
+        <div class="content-card section-header">
+          <h1 class="section-title">Quản lý người dùng</h1>
+          <p class="section-desc">Quản lý users, owners, agents, admin; khóa / mở khóa tài khoản, đổi vai trò và hỗ trợ khôi phục.</p>
+        </div>
+        <div class="placeholder-card">
+          <h3>Chức năng sẽ làm tiếp</h3>
+          <div class="placeholder-list">
+            <div class="placeholder-item">Xem danh sách users / owners / agents / admins</div>
+            <div class="placeholder-item">Khóa / mở khóa tài khoản</div>
+            <div class="placeholder-item">Đổi trạng thái: hoạt động, tạm ngưng, bị cấm</div>
+            <div class="placeholder-item">Đổi vai trò: user, owner, agent, admin</div>
+            <div class="placeholder-item">Reset mật khẩu / hỗ trợ khôi phục</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KIỂM DUYỆT -->
+      <div id="tab-kiem-duyet" class="hidden">
+        <div class="content-card section-header">
+          <h1 class="section-title">Kiểm duyệt bất động sản</h1>
+          <p class="section-desc">Duyệt bài trước khi hiển thị công khai, từ chối bài không hợp lệ, ghi chú lý do, ẩn hoặc gỡ bài vi phạm.</p>
+        </div>
+        <div class="placeholder-card">
+          <h3>Trạng thái kiểm duyệt dự kiến</h3>
+          <div class="placeholder-list">
+            <div class="placeholder-item">draft / pending / approved / rejected / hidden</div>
+            <div class="placeholder-item">Lý do từ chối listing</div>
+            <div class="placeholder-item">Gỡ bài khi có báo cáo hoặc vi phạm</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MEDIA VR -->
+      <div id="tab-media-vr" class="hidden">
+        <div class="content-card section-header">
+          <h1 class="section-title">Media / 360 / VR</h1>
+          <p class="section-desc">Kiểm tra VR tour, ảnh đại diện, ảnh chi tiết và chất lượng media của từng căn nhà.</p>
+        </div>
+        <div class="placeholder-card">
+          <h3>Chức năng sẽ làm tiếp</h3>
+          <div class="placeholder-list">
+            <div class="placeholder-item">Kiểm tra link tour 360 / VR có hoạt động hay không</div>
+            <div class="placeholder-item">Đổi ảnh đại diện listing</div>
+            <div class="placeholder-item">Gỡ media lỗi / sai / kém chất lượng</div>
+            <div class="placeholder-item">Quản lý ảnh phụ của từng bất động sản</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DANH MỤC -->
+      <div id="tab-danh-muc" class="hidden">
+        <div class="content-card section-header">
+          <h1 class="section-title">Danh mục hệ thống</h1>
+          <p class="section-desc">Quản lý loại bất động sản, tiện ích, khu vực, gói dịch vụ, banner và nội dung trang chủ.</p>
+        </div>
+        <div class="placeholder-card">
+          <h3>Dữ liệu nền sẽ quản lý tiếp</h3>
+          <div class="placeholder-list">
+            <div class="placeholder-item">Loại bất động sản</div>
+            <div class="placeholder-item">Tiện ích</div>
+            <div class="placeholder-item">Khu vực / thành phố / quận huyện</div>
+            <div class="placeholder-item">Gói dịch vụ / bảng giá / featured listings</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BÁO CÁO -->
+      <div id="tab-bao-cao" class="hidden">
+        <div class="content-card section-header">
+          <h1 class="section-title">Báo cáo quản trị</h1>
+          <p class="section-desc">Theo dõi toàn hệ thống bằng số liệu: users, listings, booking, lead, hiệu quả vận hành.</p>
+        </div>
+        <div class="placeholder-card">
+          <h3>Sẽ mở rộng tiếp các chỉ số</h3>
+          <div class="placeholder-list">
+            <div class="placeholder-item">Tổng số người dùng</div>
+            <div class="placeholder-item">Số bài đang chờ duyệt</div>
+            <div class="placeholder-item">Listing được xem nhiều nhất</div>
+            <div class="placeholder-item">Tỷ lệ view → booking</div>
+            <div class="placeholder-item">Doanh thu từ gói dịch vụ</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- THANH TOÁN -->
+      <div id="tab-thanh-toan" class="hidden">
+        <div class="content-card section-header">
+          <h1 class="section-title">Thanh toán & gói dịch vụ</h1>
+          <p class="section-desc">Quản lý giao dịch, xác nhận thanh toán, hoàn tiền, bật / tắt gói dịch vụ và điều chỉnh bảng giá.</p>
+        </div>
+        <div class="placeholder-card">
+          <h3>Chức năng sẽ làm tiếp</h3>
+          <div class="placeholder-list">
+            <div class="placeholder-item">Xem giao dịch thanh toán</div>
+            <div class="placeholder-item">Xác nhận thủ công</div>
+            <div class="placeholder-item">Quản lý hoàn tiền</div>
+            <div class="placeholder-item">Bật / tắt gói đăng tin và gói VR</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- THÔNG BÁO -->
+      <div id="tab-thong-bao" class="hidden">
+        <div class="content-card section-header">
+          <h1 class="section-title">Thông báo hệ thống</h1>
+          <p class="section-desc">Gửi thông báo tới user/owner, nhắc lịch booking, thông báo duyệt bài và tạo announcement toàn hệ thống.</p>
+        </div>
+        <div class="placeholder-card">
+          <h3>Chức năng sẽ làm tiếp</h3>
+          <div class="placeholder-list">
+            <div class="placeholder-item">Gửi nhắc lịch booking</div>
+            <div class="placeholder-item">Gửi kết quả duyệt / từ chối bài đăng</div>
+            <div class="placeholder-item">Tạo thông báo toàn hệ thống</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AUDIT -->
+      <div id="tab-audit" class="hidden">
+        <div class="content-card section-header">
+          <h1 class="section-title">Nhật ký & bảo mật</h1>
+          <p class="section-desc">Theo dõi log thao tác quản trị, lịch sử duyệt bài, bất thường hệ thống và phân quyền admin.</p>
+        </div>
+        <div class="placeholder-card">
+          <h3>Chức năng sẽ làm tiếp</h3>
+          <div class="placeholder-list">
+            <div class="placeholder-item">Lịch sử thay đổi trạng thái listing</div>
+            <div class="placeholder-item">Ai đã duyệt / từ chối bài nào</div>
+            <div class="placeholder-item">Giám sát hành vi bất thường</div>
+            <div class="placeholder-item">Phân quyền admin nhiều cấp</div>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <div class="toast" id="toast"></div>
 
   <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5elNYXyxacNzB0vvWkkAqbC-v8sK2beBFiG2xf6PPgmswAv9ISkO5W6CJMILbGI42AA/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5elNYXyxacNzB0vvWkkAqbC-v8sK2beBFiG2xf6PPgmswAv9ISkO5W6CJMILbGI42AA/exec';
 
+    let activeTab = 'tong-quan';
     let allBookings = [];
+    let allProperties = [];
 
     function showToast(message) {
       const toast = document.getElementById('toast');
@@ -330,30 +956,132 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5elNYXyxacNzB
       window.__toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
     }
 
-    function normalizeStatus(status) {
+    function switchTab(tab) {
+      activeTab = tab;
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+      });
+
+      document.querySelectorAll('.content > div[id^="tab-"]').forEach(section => {
+        section.classList.add('hidden');
+      });
+
+      const current = document.getElementById(`tab-${tab}`);
+      if (current) current.classList.remove('hidden');
+
+      if (tab === 'tong-quan') {
+        updateDashboard();
+      }
+      if (tab === 'dat-lich') {
+        renderBookings();
+      }
+      if (tab === 'can-nha') {
+        renderProperties();
+      }
+    }
+
+    function reloadCurrentSection() {
+      if (activeTab === 'dat-lich') {
+        loadBookings();
+        return;
+      }
+
+      if (activeTab === 'can-nha') {
+        loadProperties();
+        return;
+      }
+
+      Promise.all([loadBookings(false), loadProperties(false)]).then(() => {
+        updateDashboard();
+        showToast('Đã tải lại dữ liệu');
+      });
+    }
+
+    function normalizeBookingStatus(status) {
       return String(status || 'new').trim().toLowerCase();
     }
 
-    function getStatusClass(status) {
-      const s = normalizeStatus(status);
-      if (s === 'new') return 'status-new';
-      if (s === 'contacted') return 'status-contacted';
-      if (s === 'scheduled') return 'status-scheduled';
-      if (s === 'done') return 'status-done';
-      if (s === 'canceled') return 'status-canceled';
+    function bookingStatusText(status) {
+      const s = normalizeBookingStatus(status);
+      if (s === 'new') return 'Mới';
+      if (s === 'contacted') return 'Đã liên hệ';
+      if (s === 'scheduled') return 'Đã hẹn lịch';
+      if (s === 'done') return 'Hoàn tất';
+      if (s === 'canceled') return 'Đã hủy';
+      return s || 'Mới';
+    }
+
+    function bookingStatusClass(status) {
+      const s = normalizeBookingStatus(status);
+      if (s === 'new') return 'status-moi';
+      if (s === 'contacted') return 'status-da-lien-he';
+      if (s === 'scheduled') return 'status-da-hen';
+      if (s === 'done') return 'status-hoan-tat';
+      if (s === 'canceled') return 'status-da-huy';
       return '';
     }
 
-    function updateStats(bookings) {
-      const total = bookings.length;
-      const countNew = bookings.filter(b => normalizeStatus(b.status) === 'new').length;
-      const countContacted = bookings.filter(b => normalizeStatus(b.status) === 'contacted').length;
-      const countDone = bookings.filter(b => ['scheduled', 'done'].includes(normalizeStatus(b.status))).length;
+    function normalizePropertyStatus(status) {
+      return String(status || 'draft').trim().toLowerCase();
+    }
 
-      document.getElementById('statTotal').textContent = total;
-      document.getElementById('statNew').textContent = countNew;
-      document.getElementById('statContacted').textContent = countContacted;
-      document.getElementById('statDone').textContent = countDone;
+    function propertyStatusText(status) {
+      const s = normalizePropertyStatus(status);
+      if (s === 'published') return 'Đang hiển thị';
+      if (s === 'draft') return 'Bản nháp';
+      if (s === 'hidden') return 'Đã ẩn';
+      if (s === 'pending') return 'Chờ duyệt';
+      if (s === 'approved') return 'Đã duyệt';
+      if (s === 'rejected') return 'Từ chối';
+      return s || 'Bản nháp';
+    }
+
+    function propertyStatusClass(status) {
+      const s = normalizePropertyStatus(status);
+      if (s === 'published' || s === 'approved') return 'status-hien-thi';
+      if (s === 'draft') return 'status-ban-nhap';
+      if (s === 'hidden') return 'status-an';
+      if (s === 'pending') return 'status-cho-duyet';
+      if (s === 'rejected') return 'status-tu-choi';
+      return '';
+    }
+
+    function updateDashboard() {
+      const totalBookings = allBookings.length;
+      const newBookings = allBookings.filter(b => normalizeBookingStatus(b.status) === 'new').length;
+      const contactedBookings = allBookings.filter(b => normalizeBookingStatus(b.status) === 'contacted').length;
+      const scheduledBookings = allBookings.filter(b => normalizeBookingStatus(b.status) === 'scheduled').length;
+      const closedBookings = allBookings.filter(b => ['done', 'canceled'].includes(normalizeBookingStatus(b.status))).length;
+
+      const totalProperties = allProperties.length;
+      const publishedProperties = allProperties.filter(p => ['published', 'approved'].includes(normalizePropertyStatus(p.status))).length;
+      const draftProperties = allProperties.filter(p => normalizePropertyStatus(p.status) === 'draft').length;
+      const hiddenProperties = allProperties.filter(p => normalizePropertyStatus(p.status) === 'hidden').length;
+      const moderationPlaceholder = allProperties.filter(p => ['pending', 'rejected'].includes(normalizePropertyStatus(p.status))).length;
+
+      document.getElementById('dashTotalBookings').textContent = totalBookings;
+      document.getElementById('dashNewBookings').textContent = newBookings;
+      document.getElementById('dashTotalProperties').textContent = totalProperties;
+      document.getElementById('dashPublishedProperties').textContent = publishedProperties;
+
+      document.getElementById('dashContactedBookings').textContent = contactedBookings;
+      document.getElementById('dashScheduledBookings').textContent = scheduledBookings;
+      document.getElementById('dashClosedBookings').textContent = closedBookings;
+      document.getElementById('dashDraftProperties').textContent = draftProperties;
+      document.getElementById('dashHiddenProperties').textContent = hiddenProperties;
+      document.getElementById('dashModerationPlaceholder').textContent = moderationPlaceholder;
+    }
+
+    function formatDateText(value) {
+      if (!value) return '';
+      try {
+        const d = new Date(value);
+        if (isNaN(d.getTime())) return String(value);
+        return d.toLocaleString('vi-VN');
+      } catch {
+        return String(value);
+      }
     }
 
     function getFilteredBookings() {
@@ -373,21 +1101,33 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5elNYXyxacNzB
         ].join(' ').toLowerCase();
 
         const matchKeyword = !keyword || text.includes(keyword);
-        const matchStatus = status === 'all' || normalizeStatus(item.status) === status;
+        const matchStatus = status === 'all' || normalizeBookingStatus(item.status) === status;
         const matchSource = source === 'all' || String(item.source || '') === source;
 
         return matchKeyword && matchStatus && matchSource;
       });
     }
 
+    function updateBookingStats(bookings) {
+      const total = bookings.length;
+      const countNew = bookings.filter(b => normalizeBookingStatus(b.status) === 'new').length;
+      const countContacted = bookings.filter(b => normalizeBookingStatus(b.status) === 'contacted').length;
+      const countDone = bookings.filter(b => ['scheduled', 'done'].includes(normalizeBookingStatus(b.status))).length;
+
+      document.getElementById('statTotal').textContent = total;
+      document.getElementById('statNew').textContent = countNew;
+      document.getElementById('statContacted').textContent = countContacted;
+      document.getElementById('statDone').textContent = countDone;
+    }
+
     function renderBookings() {
       const filtered = getFilteredBookings();
       const tableWrap = document.getElementById('tableWrap');
 
-      updateStats(allBookings);
+      updateBookingStats(allBookings);
 
       if (!filtered.length) {
-        tableWrap.innerHTML = '<div class="empty">Không có bookings phù hợp.</div>';
+        tableWrap.innerHTML = '<div class="empty">Không có dữ liệu đặt lịch phù hợp.</div>';
         return;
       }
 
@@ -409,7 +1149,7 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5elNYXyxacNzB
               <tr>
                 <td>
                   <strong>${item.bookingId || ''}</strong><br>
-                  <span class="muted">${item.createdAt || ''}</span>
+                  <span class="muted">${formatDateText(item.createdAt) || ''}</span>
                 </td>
                 <td>
                   <strong>${item.fullName || ''}</strong><br>
@@ -418,17 +1158,17 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5elNYXyxacNzB
                 </td>
                 <td>
                   <strong>${item.selectedHouse || ''}</strong><br>
-                  <span class="muted">propertyId: ${item.propertyId || ''}</span><br>
-                  <span class="muted">source: ${item.source || ''}</span>
+                  <span class="muted">Mã căn: ${item.propertyId || ''}</span><br>
+                  <span class="muted">Nguồn: ${item.source || ''}</span>
                 </td>
                 <td>
-                  <strong>${item.appointmentDate || ''}</strong><br>
+                  <strong>${formatDateText(item.appointmentDate) || item.appointmentDate || ''}</strong><br>
                   <span class="muted">${item.appointmentTime || ''}</span><br>
                   <span class="muted">${item.message || ''}</span>
                 </td>
                 <td>
-                  <span class="status-badge ${getStatusClass(item.status)}">${normalizeStatus(item.status)}</span><br><br>
-                  <span class="muted">Xử lý: ${item.assignedTo || ''}</span>
+                  <span class="status-badge ${bookingStatusClass(item.status)}">${bookingStatusText(item.status)}</span><br><br>
+                  <span class="muted">Phụ trách: ${item.assignedTo || ''}</span>
                 </td>
                 <td>
                   <span>${item.note || ''}</span>
@@ -436,13 +1176,13 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5elNYXyxacNzB
                 <td>
                   <div class="row-actions">
                     <select id="status-${item.bookingId}">
-                      <option value="new" ${normalizeStatus(item.status) === 'new' ? 'selected' : ''}>new</option>
-                      <option value="contacted" ${normalizeStatus(item.status) === 'contacted' ? 'selected' : ''}>contacted</option>
-                      <option value="scheduled" ${normalizeStatus(item.status) === 'scheduled' ? 'selected' : ''}>scheduled</option>
-                      <option value="done" ${normalizeStatus(item.status) === 'done' ? 'selected' : ''}>done</option>
-                      <option value="canceled" ${normalizeStatus(item.status) === 'canceled' ? 'selected' : ''}>canceled</option>
+                      <option value="new" ${normalizeBookingStatus(item.status) === 'new' ? 'selected' : ''}>Mới</option>
+                      <option value="contacted" ${normalizeBookingStatus(item.status) === 'contacted' ? 'selected' : ''}>Đã liên hệ</option>
+                      <option value="scheduled" ${normalizeBookingStatus(item.status) === 'scheduled' ? 'selected' : ''}>Đã hẹn lịch</option>
+                      <option value="done" ${normalizeBookingStatus(item.status) === 'done' ? 'selected' : ''}>Hoàn tất</option>
+                      <option value="canceled" ${normalizeBookingStatus(item.status) === 'canceled' ? 'selected' : ''}>Đã hủy</option>
                     </select>
-                    <input id="assigned-${item.bookingId}" type="text" placeholder="Người xử lý" value="${item.assignedTo || ''}">
+                    <input id="assigned-${item.bookingId}" type="text" placeholder="Người phụ trách" value="${item.assignedTo || ''}">
                     <input id="note-${item.bookingId}" type="text" placeholder="Ghi chú admin" value="${item.note || ''}">
                     <button class="btn-primary" onclick="updateBooking('${item.bookingId}')">Lưu</button>
                   </div>
@@ -454,9 +1194,9 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5elNYXyxacNzB
       `;
     }
 
-    async function loadBookings() {
+    async function loadBookings(showToastAfter = true) {
       const tableWrap = document.getElementById('tableWrap');
-      tableWrap.innerHTML = '<div class="loading">Đang tải dữ liệu bookings...</div>';
+      tableWrap.innerHTML = '<div class="loading">Đang tải dữ liệu đặt lịch...</div>';
 
       try {
         const url = `${APPS_SCRIPT_URL}?action=getBookings&_t=${Date.now()}`;
@@ -464,12 +1204,14 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5elNYXyxacNzB
         const json = await res.json();
 
         if (!json.ok) {
-          throw new Error(json.error || 'Không đọc được dữ liệu bookings');
+          throw new Error(json.error || 'Không đọc được dữ liệu đặt lịch');
         }
 
         allBookings = Array.isArray(json.data) ? json.data : [];
         allBookings.sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
         renderBookings();
+        updateDashboard();
+        if (showToastAfter) showToast('Đã tải dữ liệu đặt lịch');
       } catch (error) {
         console.error(error);
         tableWrap.innerHTML = `<div class="empty">Lỗi tải dữ liệu: ${error.message}</div>`;
@@ -504,10 +1246,272 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5elNYXyxacNzB
         }
 
         renderBookings();
+        updateDashboard();
         showToast(`Đã cập nhật ${bookingId}`);
       } catch (error) {
         console.error(error);
-        showToast('Có lỗi khi cập nhật booking');
+        showToast('Có lỗi khi cập nhật đặt lịch');
+      }
+    }
+
+    function setPreview(url) {
+      const img = document.querySelector('#thumbPreview img');
+      img.src = url || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80';
+    }
+
+    function resetPropertyForm() {
+      document.getElementById('propertyFormTitle').textContent = 'Thêm căn nhà mới';
+      document.getElementById('propertyId').value = '';
+      document.getElementById('propertyCode').value = '';
+      document.getElementById('name').value = '';
+      document.getElementById('type').value = '';
+      document.getElementById('areaGroup').value = '';
+      document.getElementById('location').value = '';
+      document.getElementById('address').value = '';
+      document.getElementById('priceText').value = '';
+      document.getElementById('priceValue').value = '';
+      document.getElementById('purpose').value = '';
+      document.getElementById('rooms').value = '';
+      document.getElementById('bathrooms').value = '';
+      document.getElementById('area').value = '';
+      document.getElementById('propertyStatus').value = 'draft';
+      document.getElementById('ownerId').value = '';
+      document.getElementById('agentId').value = '';
+      document.getElementById('vrLink').value = '';
+      document.getElementById('thumbnail').value = '';
+      document.getElementById('description').value = '';
+      setPreview('');
+    }
+
+    function fillPropertyForm(item) {
+      document.getElementById('propertyFormTitle').textContent = `Sửa căn nhà: ${item.name || ''}`;
+      document.getElementById('propertyId').value = item.propertyId || '';
+      document.getElementById('propertyCode').value = item.propertyCode || '';
+      document.getElementById('name').value = item.name || '';
+      document.getElementById('type').value = item.type || '';
+      document.getElementById('areaGroup').value = item.areaGroup || '';
+      document.getElementById('location').value = item.location || '';
+      document.getElementById('address').value = item.address || '';
+      document.getElementById('priceText').value = item.priceText || '';
+      document.getElementById('priceValue').value = item.priceValue || '';
+      document.getElementById('purpose').value = item.purpose || '';
+      document.getElementById('rooms').value = item.rooms || '';
+      document.getElementById('bathrooms').value = item.bathrooms || '';
+      document.getElementById('area').value = item.area || '';
+      document.getElementById('propertyStatus').value = normalizePropertyStatus(item.status || 'draft');
+      document.getElementById('ownerId').value = item.ownerId || '';
+      document.getElementById('agentId').value = item.agentId || '';
+      document.getElementById('vrLink').value = item.vrLink || '';
+      document.getElementById('thumbnail').value = item.thumbnail || '';
+      document.getElementById('description').value = item.description || '';
+      setPreview(item.thumbnail || '');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function getFilteredProperties() {
+      const keyword = document.getElementById('propertySearchInput').value.trim().toLowerCase();
+      const type = document.getElementById('typeFilterProperty').value;
+      const status = document.getElementById('propertyStatusFilter').value;
+
+      return allProperties.filter(item => {
+        const text = [
+          item.propertyId,
+          item.propertyCode,
+          item.name,
+          item.type,
+          item.areaGroup,
+          item.location,
+          item.address,
+          item.priceText,
+          item.description
+        ].join(' ').toLowerCase();
+
+        const matchKeyword = !keyword || text.includes(keyword);
+        const matchType = type === 'all' || item.type === type;
+        const matchStatus = status === 'all' || normalizePropertyStatus(item.status) === status;
+
+        return matchKeyword && matchType && matchStatus;
+      });
+    }
+
+    function renderProperties() {
+      const filtered = getFilteredProperties();
+      const tableWrap = document.getElementById('propertyTableWrap');
+
+      if (!filtered.length) {
+        tableWrap.innerHTML = '<div class="empty">Không có dữ liệu căn nhà phù hợp.</div>';
+        return;
+      }
+
+      tableWrap.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Tên căn nhà</th>
+              <th>Loại</th>
+              <th>Khu vực</th>
+              <th>Giá</th>
+              <th>Thông số</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filtered.map(item => `
+              <tr>
+                <td>
+                  <strong>${item.propertyId || ''}</strong><br>
+                  <span class="muted">${item.propertyCode || ''}</span>
+                </td>
+                <td>
+                  <strong>${item.name || ''}</strong><br>
+                  <span class="muted">${item.location || ''}</span><br>
+                  <span class="muted">${item.address || ''}</span>
+                </td>
+                <td>
+                  <strong>${item.type || ''}</strong><br>
+                  <span class="muted">${item.purpose || ''}</span>
+                </td>
+                <td>
+                  <strong>${item.areaGroup || ''}</strong>
+                </td>
+                <td>
+                  <strong>${item.priceText || ''}</strong><br>
+                  <span class="muted">priceValue: ${item.priceValue || ''}</span>
+                </td>
+                <td>
+                  <span>${item.area || ''} m²</span><br>
+                  <span class="muted">${item.rooms || ''} phòng • ${item.bathrooms || ''} WC</span>
+                </td>
+                <td>
+                  <span class="status-badge ${propertyStatusClass(item.status)}">${propertyStatusText(item.status)}</span>
+                </td>
+                <td>
+                  <span class="link-action" onclick="fillPropertyFormById('${item.propertyId}')">Sửa</span>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    async function loadProperties(showToastAfter = true) {
+      const tableWrap = document.getElementById('propertyTableWrap');
+      tableWrap.innerHTML = '<div class="loading">Đang tải dữ liệu căn nhà...</div>';
+
+      try {
+        const url = `${APPS_SCRIPT_URL}?action=getProperties&_t=${Date.now()}`;
+        const res = await fetch(url);
+        const json = await res.json();
+
+        if (!json.ok) {
+          throw new Error(json.error || 'Không đọc được dữ liệu căn nhà');
+        }
+
+        allProperties = Array.isArray(json.data) ? json.data.map(item => ({
+          propertyId: item.propertyId || '',
+          propertyCode: item.propertyCode || '',
+          name: item.name || '',
+          type: item.type || '',
+          areaGroup: item.areaGroup || '',
+          location: item.location || '',
+          address: item.address || '',
+          priceText: item.priceText || '',
+          priceValue: item.priceValue || '',
+          purpose: item.purpose || '',
+          rooms: item.rooms || '',
+          bathrooms: item.bathrooms || '',
+          area: item.area || '',
+          status: item.status || 'draft',
+          ownerId: item.owner?.contactId || '',
+          agentId: item.agent?.contactId || '',
+          vrLink: item.vrLink || '',
+          thumbnail: item.thumbnail || '',
+          description: item.description || ''
+        })) : [];
+
+        renderProperties();
+        updateDashboard();
+        if (showToastAfter) showToast('Đã tải dữ liệu căn nhà');
+      } catch (error) {
+        console.error(error);
+        tableWrap.innerHTML = `<div class="empty">Lỗi tải dữ liệu: ${error.message}</div>`;
+      }
+    }
+
+    function fillPropertyFormById(propertyId) {
+      const item = allProperties.find(x => String(x.propertyId) === String(propertyId));
+      if (!item) return;
+      fillPropertyForm(item);
+    }
+
+    async function saveProperty() {
+      const propertyId = document.getElementById('propertyId').value.trim();
+      const propertyCode = document.getElementById('propertyCode').value.trim();
+      const name = document.getElementById('name').value.trim();
+      const type = document.getElementById('type').value;
+      const areaGroup = document.getElementById('areaGroup').value;
+      const location = document.getElementById('location').value.trim();
+      const address = document.getElementById('address').value.trim();
+      const priceText = document.getElementById('priceText').value.trim();
+      const priceValue = document.getElementById('priceValue').value.trim();
+      const purpose = document.getElementById('purpose').value;
+      const rooms = document.getElementById('rooms').value.trim();
+      const bathrooms = document.getElementById('bathrooms').value.trim();
+      const area = document.getElementById('area').value.trim();
+      const status = document.getElementById('propertyStatus').value;
+      const ownerId = document.getElementById('ownerId').value.trim();
+      const agentId = document.getElementById('agentId').value.trim();
+      const vrLink = document.getElementById('vrLink').value.trim();
+      const thumbnail = document.getElementById('thumbnail').value.trim();
+      const description = document.getElementById('description').value.trim();
+
+      if (!name || !type || !areaGroup || !location || !priceText) {
+        showToast('Vui lòng nhập đủ tên nhà, loại nhà, khu vực, địa điểm và giá.');
+        return;
+      }
+
+      try {
+        const payload = new URLSearchParams({
+          action: propertyId ? 'updateProperty' : 'createProperty',
+          propertyId,
+          propertyCode,
+          name,
+          type,
+          areaGroup,
+          location,
+          address,
+          priceText,
+          priceValue,
+          purpose,
+          rooms,
+          bathrooms,
+          area,
+          status,
+          ownerId,
+          agentId,
+          vrLink,
+          thumbnail,
+          description
+        });
+
+        await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: payload,
+          mode: 'no-cors'
+        });
+
+        showToast(propertyId ? 'Đã cập nhật căn nhà' : 'Đã thêm căn nhà mới');
+        resetPropertyForm();
+
+        setTimeout(() => {
+          loadProperties(false);
+        }, 800);
+      } catch (error) {
+        console.error(error);
+        showToast('Có lỗi khi lưu căn nhà');
       }
     }
 
@@ -515,7 +1519,15 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5elNYXyxacNzB
     document.getElementById('statusFilter').addEventListener('change', renderBookings);
     document.getElementById('sourceFilter').addEventListener('change', renderBookings);
 
-    loadBookings();
+    document.getElementById('propertySearchInput').addEventListener('input', renderProperties);
+    document.getElementById('typeFilterProperty').addEventListener('change', renderProperties);
+    document.getElementById('propertyStatusFilter').addEventListener('change', renderProperties);
+    document.getElementById('thumbnail').addEventListener('input', (e) => setPreview(e.target.value));
+
+    Promise.all([loadBookings(false), loadProperties(false)]).then(() => {
+      updateDashboard();
+      switchTab('tong-quan');
+    });
   </script>
 </body>
 </html>
