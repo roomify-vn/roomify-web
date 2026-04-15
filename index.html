@@ -2031,7 +2031,6 @@ select option:hover {
   <iframe id="detailVR" allowfullscreen loading="lazy"></iframe>
 </div>
 
-<div id="detailContactMini" class="detail-contact-mini"></div>
 
         </div>
       </div>
@@ -2289,7 +2288,7 @@ async function loadAdminProperties() {
     }
   }
 }
-   const baseproperties = [
+const baseProperties = [
   {
     id: 1,
     name: 'Căn hộ Lumiere Riverside',
@@ -3240,8 +3239,13 @@ if (currentPage === 'properties' && history.state?.page === 'properties') {
 }
 
     function renderDetail(propertyId) {
-      const property = properties.find(p => p.id === Number(propertyId)) || properties[0];
-      currentProperty = property;
+   const property = properties.find(p => p.id === Number(propertyId)) || properties[0];
+if (!property) {
+  showToast('Không tìm thấy thông tin căn nhà.');
+  navigate('properties');
+  return;
+}
+currentProperty = property;
       currentGalleryIndex = 0;
 
       document.getElementById('detailTitle').textContent = property.name;
@@ -3252,7 +3256,7 @@ if (currentPage === 'properties' && history.state?.page === 'properties') {
 vrFrame.src = '';
 
 setTimeout(() => {
-  vrFrame.src = property.vr;
+  vrFrame.src = property.vr || 'about:blank';
 }, 300);
 
       document.getElementById('detailTags').innerHTML = property.tags.map(tag => `<span class="detail-tag">${tag}</span>`).join('');
