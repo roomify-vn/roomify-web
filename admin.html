@@ -510,7 +510,7 @@
         <button class="nav-btn active" data-tab="tong-quan" onclick="switchTab('tong-quan')">Tổng quan</button>
         <button class="nav-btn" data-tab="dat-lich" onclick="switchTab('dat-lich')">Đặt lịch & lead</button>
         <button class="nav-btn" data-tab="can-nha" onclick="switchTab('can-nha')">Quản lý căn nhà</button>
-      <button class="nav-btn" data-tab="ai-listing" onclick="switchTab('ai-listing')">Tạo video từ ảnh</button>
+    <button class="nav-btn" data-tab="ai-listing" onclick="switchTab('ai-listing')">AI tạo ảnh & video</button>
       </div>
     </aside>
 
@@ -569,7 +569,7 @@
   <p>
     Hệ thống hiện tập trung vào 4 khu vực chính:
     <strong>Tổng quan</strong>, <strong>Đặt lịch & lead</strong>,
-    <strong>Quản lý căn nhà</strong> và <strong>Tạo video từ ảnh</strong>.
+  <strong>Quản lý căn nhà</strong> và <strong>AI tạo ảnh & video</strong>.
   </p>
 </div>
         </div>
@@ -792,19 +792,19 @@
       </div>
 <div id="tab-ai-listing" class="hidden">
   <div class="content-card section-header">
-   <h1 class="section-title">Tạo video từ ảnh</h1>
+<h1 class="section-title">AI tạo ảnh & video</h1>
 <p class="section-desc">
-  Tải 1 đến 3 ảnh bất động sản để hệ thống tạo video AI trực tiếp.
+ Tải 1 ảnh bất động sản để AI tạo thêm nhiều ảnh biến thể. Sau đó có thể ghép thành video giới thiệu.
 </p>
   </div>
 
   <div class="panel-wrap">
     <div class="form-card">
-     <h2 class="form-title">Tạo video từ ảnh</h2>
+    <h2 class="form-title">Tạo nhiều ảnh từ 1 ảnh</h2>
 
      <div class="field">
   <label>Chọn ảnh từ máy</label>
-<input id="aiImageFile" type="file" accept="image/*" multiple>
+<input id="aiImageFile" type="file" accept="image/*">
 </div>
 <div class="field">
   <label>Hoặc dán ảnh bằng Ctrl + V</label>
@@ -831,7 +831,7 @@
   </div>
 </div>
 <div class="field">
-  <label>Hoặc dán nhiều link ảnh, mỗi dòng 1 link</label>
+ <label>Hoặc dán 1 link ảnh</label>
   <textarea id="aiImageUrl" placeholder="https://...jpg&#10;https://...png&#10;hoặc sẽ tự điền data:image khi bạn chọn ảnh"></textarea>
 </div>
 
@@ -844,11 +844,35 @@
   "></div>
 </div>
 <div class="btn-row">
-  <button class="btn-primary" onclick="createVideoFromImages()">Tạo video</button>
+  <button class="btn-primary" onclick="generateAiImages()">Tạo ảnh AI</button>
+  <button class="btn-secondary" onclick="createVideoFromGeneratedImages()">Tạo video từ ảnh AI</button>
 </div>
-    
-      <div class="field" style="margin-top:16px;">
-  <label>Video AI</label>
+
+<div class="field" style="margin-top:16px;">
+  <label>Ảnh AI tạo thêm</label>
+  <div id="aiGeneratedGrid" style="
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:12px;
+  ">
+    <div style="
+      grid-column:1/-1;
+      min-height:180px;
+      border-radius:16px;
+      border:1px dashed rgba(255,255,255,.10);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#9fb0cc;
+      background:rgba(255,255,255,.03);
+    ">
+      Chưa có ảnh AI
+    </div>
+  </div>
+</div>
+
+<div class="field" style="margin-top:16px;">
+  <label>Video slideshow</label>
   <div id="aiVideoWrap" style="
     width:100%;
     min-height:220px;
@@ -865,10 +889,11 @@
     Chưa có video AI
   </div>
 </div>
-    </div>
-   
-  </div>
+      
 </div>
+</div>
+</div>
+      
     </section>
   </main>
 
@@ -935,71 +960,85 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyKmuBoXoEZ5p2E
     showToast('Đã tải lại dữ liệu');
   });
 }
-    let currentAiJobId = '';
+   let currentAiJobId = '';
+let currentSourceImage = '';
+let currentAiImages = [];
+    
+let generatedAiImages = [];
+let currentAiVideoUrl = '';
 
-    async function createVideoFromImages() {
-  const imageUrls = currentAiImages.length
-    ? currentAiImages
-    : document.getElementById('aiImageUrl').value
-        .split('\n')
-        .map(x => x.trim())
-        .filter(Boolean);
+   async function generateAiImages() {
+  const imageUrl = currentSourceImage || document.getElementById('aiImageUrl').value.trim();
 
-  if (!imageUrls.length) {
-    showToast('Vui lòng chọn hoặc dán ít nhất 1 ảnh.');
+  if (!imageUrl) {
+    showToast('Vui lòng chọn hoặc dán 1 ảnh.');
     return;
   }
 
   try {
+    generatedAiImages = [];
+    renderGeneratedAiGrid();
     setAiVideo('');
-    showToast('Đang tạo job video...');
+    showToast('Đang tạo ảnh AI...');
 
-    const payloadCreate = new URLSearchParams({
-      action: 'createVideoJob',
-      imageUrls: JSON.stringify(imageUrls)
+    const payload = new URLSearchParams({
+      action: 'generateAiImages',
+      imageUrl
     });
 
-    const resCreate = await fetch(APPS_SCRIPT_URL, {
+    const res = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      body: payloadCreate
+      body: payload
     });
 
-    const jsonCreate = await resCreate.json();
+    const json = await res.json();
 
-    if (!jsonCreate.ok) {
-      throw new Error(jsonCreate.error || 'Không tạo được job video');
+    if (!json.ok) {
+      throw new Error(json.error || 'Không tạo được ảnh AI');
     }
 
-    currentAiJobId = jsonCreate.data.jobId;
+    generatedAiImages = Array.isArray(json.data.images) ? json.data.images : [];
+    renderGeneratedAiGrid();
+    showToast(`Đã tạo ${generatedAiImages.length} ảnh AI.`);
+  } catch (error) {
+    console.error(error);
+    showToast(`Lỗi ảnh AI: ${error.message}`);
+  }
+}
 
-    showToast('Đang render video AI...');
+async function createVideoFromGeneratedImages() {
+  if (!generatedAiImages.length) {
+    showToast('Bạn cần tạo ảnh AI trước.');
+    return;
+  }
 
-    const payloadVideo = new URLSearchParams({
-      action: 'generateAiVideo',
-      jobId: currentAiJobId
+  try {
+    showToast('Đang tạo video từ ảnh AI...');
+
+    const payload = new URLSearchParams({
+      action: 'createSlideshowVideo',
+      imageUrls: JSON.stringify(generatedAiImages)
     });
 
-    const resVideo = await fetch(APPS_SCRIPT_URL, {
+    const res = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      body: payloadVideo
+      body: payload
     });
 
-    const jsonVideo = await resVideo.json();
+    const json = await res.json();
 
-    if (!jsonVideo.ok) {
-      throw new Error(jsonVideo.error || 'Không tạo được video');
+    if (!json.ok) {
+      throw new Error(json.error || 'Không tạo được video');
     }
 
-    setAiVideo(jsonVideo.data.generatedVideoUrl || '');
-    showToast('Đã tạo video xong.');
+    setAiVideo(json.data.videoUrl || '');
+    showToast('Đã tạo video slideshow.');
   } catch (error) {
     console.error(error);
     showToast(`Lỗi video: ${error.message}`);
   }
 }
   
-let currentAiImages = [];
-let currentAiVideoUrl = '';
 function escapeHtml(value) {
   return String(value || '')
     .replace(/&/g, '&amp;')
@@ -1013,7 +1052,7 @@ function renderAiPreviewGrid() {
   const grid = document.getElementById('aiPreviewGrid');
   if (!grid) return;
 
-  if (!currentAiImages.length) {
+  if (!currentSourceImage) {
     grid.innerHTML = `
       <div style="
         grid-column:1/-1;
@@ -1026,13 +1065,13 @@ function renderAiPreviewGrid() {
         color:#9fb0cc;
         background:rgba(255,255,255,.03);
       ">
-        Chưa có ảnh nào
+        Chưa có ảnh gốc
       </div>
     `;
     return;
   }
 
-  grid.innerHTML = currentAiImages.map((src, index) => `
+  grid.innerHTML = `
     <div style="
       position:relative;
       aspect-ratio:16/10;
@@ -1041,10 +1080,10 @@ function renderAiPreviewGrid() {
       border:1px solid rgba(255,255,255,.08);
       background:rgba(255,255,255,.04);
     ">
-      <img src="${escapeHtml(src)}" style="width:100%;height:100%;object-fit:cover;display:block;">
+      <img src="${escapeHtml(currentSourceImage)}" style="width:100%;height:100%;object-fit:cover;display:block;">
       <button
         type="button"
-        onclick="removeAiImage(${index})"
+        onclick="clearSourceImage()"
         style="
           position:absolute;
           top:8px;
@@ -1060,17 +1099,58 @@ function renderAiPreviewGrid() {
         "
       >×</button>
     </div>
+  `;
+}
+function renderGeneratedAiGrid() {
+  const grid = document.getElementById('aiGeneratedGrid');
+  if (!grid) return;
+
+  if (!generatedAiImages.length) {
+    grid.innerHTML = `
+      <div style="
+        grid-column:1/-1;
+        min-height:180px;
+        border-radius:16px;
+        border:1px dashed rgba(255,255,255,.10);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        color:#9fb0cc;
+        background:rgba(255,255,255,.03);
+      ">
+        Chưa có ảnh AI
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = generatedAiImages.map(src => `
+    <div style="
+      aspect-ratio:16/10;
+      border-radius:16px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.04);
+    ">
+      <img src="${escapeHtml(src)}" style="width:100%;height:100%;object-fit:cover;display:block;">
+    </div>
   `).join('');
 }
 
+function clearSourceImage() {
+  currentSourceImage = '';
+  currentAiImages = [];
+  document.getElementById('aiImageUrl').value = '';
+  renderAiPreviewGrid();
+}
 function syncAiImageTextarea() {
-  document.getElementById('aiImageUrl').value = currentAiImages.join('\n');
+  document.getElementById('aiImageUrl').value = currentSourceImage || '';
 }
 
 function addAiImage(dataUrl) {
   if (!dataUrl) return;
-  currentAiImages.push(dataUrl);
-  currentAiImages = currentAiImages.slice(0, 12);
+  currentSourceImage = dataUrl;
+  currentAiImages = [dataUrl];
   syncAiImageTextarea();
   renderAiPreviewGrid();
 }
@@ -1131,42 +1211,28 @@ aiPasteZone?.addEventListener('click', function () {
   aiPasteZone.focus();
 });
 document.getElementById('aiImageFile')?.addEventListener('change', function (event) {
-  const files = Array.from(event.target.files || []);
-  if (!files.length) return;
+  const file = event.target.files?.[0];
+  if (!file) return;
 
-  currentAiImages = [];
-  let loaded = 0;
-
-  files.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const dataUrl = e.target?.result || '';
-      if (dataUrl) currentAiImages.push(dataUrl);
-      loaded++;
-
-      if (loaded === files.length) {
-        currentAiImages = currentAiImages.slice(0, 12);
-        syncAiImageTextarea();
-        renderAiPreviewGrid();
-        showToast(`Đã nạp ${currentAiImages.length} ảnh.`);
-      }
-    };
-    reader.readAsDataURL(file);
-  });
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const dataUrl = e.target?.result || '';
+    currentSourceImage = dataUrl;
+    currentAiImages = dataUrl ? [dataUrl] : [];
+    syncAiImageTextarea();
+    renderAiPreviewGrid();
+    showToast('Đã nạp ảnh gốc.');
+  };
+  reader.readAsDataURL(file);
 });
 
 document.getElementById('aiImageUrl')?.addEventListener('input', function () {
-  const lines = this.value
-    .split('\n')
-    .map(x => x.trim())
-    .filter(Boolean);
-
-  currentAiImages = lines
-    .filter(x => x.startsWith('data:image/') || x.startsWith('http'))
-    .slice(0, 12);
-
+  const value = this.value.trim();
+  currentSourceImage = value;
+  currentAiImages = value ? [value] : [];
   renderAiPreviewGrid();
 });
+
     function normalizeBookingStatus(status) {
       return String(status || 'new').trim().toLowerCase();
     }
