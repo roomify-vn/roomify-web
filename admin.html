@@ -510,7 +510,8 @@
         <button class="nav-btn active" data-tab="tong-quan" onclick="switchTab('tong-quan')">Tổng quan</button>
         <button class="nav-btn" data-tab="dat-lich" onclick="switchTab('dat-lich')">Đặt lịch & lead</button>
         <button class="nav-btn" data-tab="can-nha" onclick="switchTab('can-nha')">Quản lý căn nhà</button>
-    <button class="nav-btn" data-tab="ai-listing" onclick="switchTab('ai-listing')">AI tạo ảnh & video</button>
+<button class="nav-btn" data-tab="chu-nha" onclick="switchTab('chu-nha')">Quản lý chủ nhà</button>
+<button class="nav-btn" data-tab="ai-listing" onclick="switchTab('ai-listing')">AI tạo ảnh & video</button>
       </div>
     </aside>
 
@@ -732,17 +733,20 @@
               <input id="area" type="number" placeholder="68">
             </div>
 
-            <div class="form-grid">
-              <div class="field">
-                <label>Mã chủ nhà</label>
-                <input id="ownerId" type="text" placeholder="C001">
-              </div>
-              <div class="field">
-                <label>Mã môi giới</label>
-                <input id="agentId" type="text" placeholder="C002">
-              </div>
-            </div>
-
+<div class="form-grid">
+  <div class="field">
+    <label>Chủ nhà</label>
+    <select id="ownerId">
+      <option value="">Chọn chủ nhà</option>
+    </select>
+  </div>
+  <div class="field">
+    <label>Môi giới</label>
+    <select id="agentId">
+      <option value="">Chọn môi giới</option>
+    </select>
+  </div>
+</div>
             <div class="field">
               <label>Link 360 / VR</label>
               <input id="vrLink" type="text" placeholder="https://my.matterport.com/show/?m=...">
@@ -790,6 +794,70 @@
           </div>
         </div>
       </div>
+      <div id="tab-chu-nha" class="hidden">
+  <div class="content-card section-header">
+    <h1 class="section-title">Quản lý chủ nhà</h1>
+    <p class="section-desc">Quản lý danh sách chủ nhà, thông tin liên hệ và đồng bộ với form căn nhà.</p>
+  </div>
+
+  <div class="panel-wrap">
+    <div class="form-card">
+      <h2 class="form-title" id="ownerFormTitle">Thêm chủ nhà mới</h2>
+
+      <input type="hidden" id="contactEditId">
+
+      <div class="field">
+        <label>Mã chủ nhà</label>
+        <input id="contactId" type="text" placeholder="C001">
+      </div>
+
+      <div class="field">
+        <label>Họ và tên</label>
+        <input id="contactFullName" type="text" placeholder="Nguyễn Văn A">
+      </div>
+
+      <div class="field">
+        <label>Số điện thoại</label>
+        <input id="contactPhone" type="text" placeholder="0901234567">
+      </div>
+
+      <div class="field">
+        <label>Email</label>
+        <input id="contactEmail" type="text" placeholder="example@email.com">
+      </div>
+
+      <div class="field">
+        <label>Vai trò</label>
+        <select id="contactRole">
+          <option value="owner">Chủ nhà</option>
+          <option value="agent">Môi giới</option>
+        </select>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-primary" onclick="saveContact()">Lưu liên hệ</button>
+        <button class="btn-secondary" onclick="resetContactForm()">Xóa form</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="toolbar toolbar-properties">
+        <input id="contactSearchInput" type="text" placeholder="Tìm theo mã, tên, điện thoại, email..." />
+        <select id="contactRoleFilter">
+          <option value="all">Tất cả vai trò</option>
+          <option value="owner">Chủ nhà</option>
+          <option value="agent">Môi giới</option>
+        </select>
+        <div></div>
+        <button class="btn-primary" onclick="renderContacts()">Lọc dữ liệu</button>
+      </div>
+
+      <div class="table-card">
+        <div id="contactTableWrap" class="loading">Đang tải dữ liệu chủ nhà...</div>
+      </div>
+    </div>
+  </div>
+</div>
 <div id="tab-ai-listing" class="hidden">
   <div class="content-card section-header">
 <h1 class="section-title">AI tạo ảnh & video</h1>
@@ -900,11 +968,54 @@
   <div class="toast" id="toast"></div>
 
   <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwKgjdB2jH-5Ic_ycrOCZ3eHAmWZDqE_WvDq7UKF3pumT4gPUKgP8v6YAp2TJjojiS5tw/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzH9AEMRNhI8V2DMcNfUx2DQQN_Hyda_FeffBiHfcn7p4-OKfc-gS_bP_6e-_bLB-hnoA/exec';
+async function saveContact() {
+  const contactEditId = document.getElementById('contactEditId').value.trim();
+  const contactId = document.getElementById('contactId').value.trim();
+  const fullName = document.getElementById('contactFullName').value.trim();
+  const phone = document.getElementById('contactPhone').value.trim();
+  const email = document.getElementById('contactEmail').value.trim();
+  const role = document.getElementById('contactRole').value;
 
-    let activeTab = 'tong-quan';
-    let allBookings = [];
-    let allProperties = [];
+  if (!contactId || !fullName) {
+    showToast('Vui lòng nhập mã và họ tên.');
+    return;
+  }
+
+  try {
+    const payload = new URLSearchParams({
+      action: contactEditId ? 'updateContact' : 'createContact',
+      contactId,
+      fullName,
+      phone,
+      email,
+      role
+    });
+
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: payload,
+      mode: 'no-cors'
+    });
+
+    showToast(contactEditId ? 'Đã cập nhật liên hệ' : 'Đã thêm liên hệ mới');
+    resetContactForm();
+
+    setTimeout(() => {
+      Promise.all([loadContacts(false), loadProperties(false)]).then(() => {
+        renderContacts();
+        renderContactSelects();
+      });
+    }, 800);
+  } catch (error) {
+    console.error(error);
+    showToast('Có lỗi khi lưu liên hệ');
+  }
+}
+ let activeTab = 'tong-quan';
+let allBookings = [];
+let allProperties = [];
+let allContacts = [];
 
     function showToast(message) {
       const toast = document.getElementById('toast');
@@ -914,51 +1025,218 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwKgjdB2jH-5Ic_
       window.__toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
     }
 
-    function switchTab(tab) {
-      activeTab = tab;
+  function switchTab(tab) {
+  activeTab = tab;
 
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tab === tab);
-      });
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tab);
+  });
 
-      document.querySelectorAll('.content > div[id^="tab-"]').forEach(section => {
-        section.classList.add('hidden');
-      });
+  document.querySelectorAll('.content > div[id^="tab-"]').forEach(section => {
+    section.classList.add('hidden');
+  });
 
-      const current = document.getElementById(`tab-${tab}`);
-      if (current) current.classList.remove('hidden');
+  const current = document.getElementById(`tab-${tab}`);
+  if (current) current.classList.remove('hidden');
 
-      if (tab === 'tong-quan') {
-        updateDashboard();
-      }
-      if (tab === 'dat-lich') {
-        renderBookings();
-      }
-      if (tab === 'can-nha') {
-        renderProperties();
-      }
-    }
+  if (tab === 'tong-quan') {
+    updateDashboard();
+  }
 
-    function reloadCurrentSection() {
+  if (tab === 'dat-lich') {
+    renderBookings();
+  }
+
+  if (tab === 'can-nha') {
+    renderProperties();
+  }
+
+  if (tab === 'chu-nha') {
+    renderContacts();
+  }
+}
+
+   function reloadCurrentSection() {
   if (activeTab === 'dat-lich') {
     loadBookings();
     return;
   }
 
   if (activeTab === 'can-nha') {
-    loadProperties();
+    Promise.all([loadProperties(false), loadContacts(false)]).then(() => {
+      renderProperties();
+      showToast('Đã tải lại dữ liệu căn nhà');
+    });
     return;
   }
-
+if (activeTab === 'chu-nha') {
+  loadContacts();
+  return;
+}
   if (activeTab === 'ai-listing') {
-    showToast('Tab video không cần tải lại riêng.');
+    showToast('Tab AI không cần tải lại riêng.');
     return;
   }
 
-  Promise.all([loadBookings(false), loadProperties(false)]).then(() => {
+  Promise.all([loadBookings(false), loadProperties(false), loadContacts(false)]).then(() => {
     updateDashboard();
     showToast('Đã tải lại dữ liệu');
   });
+}
+    async function loadContacts(showToastAfter = true) {
+  try {
+    const url = `${APPS_SCRIPT_URL}?action=getContacts&_t=${Date.now()}`;
+    const res = await fetch(url);
+    const json = await res.json();
+
+    if (!json.ok) {
+      throw new Error(json.error || 'Không đọc được dữ liệu contacts');
+    }
+
+    allContacts = Array.isArray(json.data) ? json.data : [];
+    renderContactSelects();
+
+    if (showToastAfter) showToast('Đã tải danh sách chủ nhà và môi giới');
+  } catch (error) {
+    console.error(error);
+    showToast(`Lỗi contacts: ${error.message}`);
+  }
+}
+    function renderContactSelects() {
+  const ownerSelect = document.getElementById('ownerId');
+  const agentSelect = document.getElementById('agentId');
+
+  if (!ownerSelect || !agentSelect) return;
+
+  const currentOwner = ownerSelect.value;
+  const currentAgent = agentSelect.value;
+
+  const owners = allContacts.filter(item =>
+    String(item.role || '').trim().toLowerCase() === 'owner'
+  );
+
+  const agents = allContacts.filter(item =>
+    String(item.role || '').trim().toLowerCase() === 'agent'
+  );
+
+  ownerSelect.innerHTML = `
+    <option value="">Chọn chủ nhà</option>
+    ${owners.map(item => `
+      <option value="${item.contactId}">
+        ${item.contactId} - ${item.fullName || 'Không tên'}
+      </option>
+    `).join('')}
+  `;
+
+  agentSelect.innerHTML = `
+    <option value="">Chọn môi giới</option>
+    ${agents.map(item => `
+      <option value="${item.contactId}">
+        ${item.contactId} - ${item.fullName || 'Không tên'}
+      </option>
+    `).join('')}
+  `;
+
+  ownerSelect.value = currentOwner || '';
+  agentSelect.value = currentAgent || '';
+}
+      function resetContactForm() {
+  document.getElementById('ownerFormTitle').textContent = 'Thêm chủ nhà mới';
+  document.getElementById('contactEditId').value = '';
+  document.getElementById('contactId').value = '';
+  document.getElementById('contactFullName').value = '';
+  document.getElementById('contactPhone').value = '';
+  document.getElementById('contactEmail').value = '';
+  document.getElementById('contactRole').value = 'owner';
+}
+
+function fillContactForm(item) {
+  document.getElementById('ownerFormTitle').textContent = `Sửa liên hệ: ${item.fullName || ''}`;
+  document.getElementById('contactEditId').value = item.contactId || '';
+  document.getElementById('contactId').value = item.contactId || '';
+  document.getElementById('contactFullName').value = item.fullName || '';
+  document.getElementById('contactPhone').value = item.phone || '';
+  document.getElementById('contactEmail').value = item.email || '';
+  document.getElementById('contactRole').value = item.role || 'owner';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function getFilteredContacts() {
+  const keyword = document.getElementById('contactSearchInput')?.value.trim().toLowerCase() || '';
+  const role = document.getElementById('contactRoleFilter')?.value || 'all';
+
+  return allContacts.filter(item => {
+    const text = [
+      item.contactId,
+      item.fullName,
+      item.phone,
+      item.email,
+      item.role
+    ].join(' ').toLowerCase();
+
+    const matchKeyword = !keyword || text.includes(keyword);
+    const matchRole = role === 'all' || String(item.role || '').trim().toLowerCase() === role;
+
+    return matchKeyword && matchRole;
+  });
+}
+
+function renderContacts() {
+  const wrap = document.getElementById('contactTableWrap');
+  if (!wrap) return;
+
+  const filtered = getFilteredContacts();
+
+  if (!filtered.length) {
+    wrap.innerHTML = '<div class="empty">Không có dữ liệu liên hệ phù hợp.</div>';
+    return;
+  }
+
+  wrap.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Mã</th>
+          <th>Họ tên</th>
+          <th>Điện thoại</th>
+          <th>Email</th>
+          <th>Vai trò</th>
+          <th>Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${filtered.map(item => `
+          <tr>
+            <td><strong>${item.contactId || ''}</strong></td>
+            <td>${item.fullName || ''}</td>
+            <td>${item.phone || ''}</td>
+            <td>${item.email || ''}</td>
+            <td>
+              <span class="status-badge ${String(item.role || '') === 'agent' ? 'status-da-lien-he' : 'status-hoan-tat'}">
+                ${String(item.role || '') === 'agent' ? 'Môi giới' : 'Chủ nhà'}
+              </span>
+            </td>
+            <td>
+              <div style="display:flex; flex-direction:column; gap:8px; min-width:120px">
+                <button class="btn-secondary" onclick="editContact('${item.contactId}')">Sửa</button>
+              </div>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function editContact(contactId) {
+  const item = allContacts.find(x => String(x.contactId) === String(contactId));
+  if (!item) {
+    showToast('Không tìm thấy liên hệ.');
+    return;
+  }
+
+  fillContactForm(item);
+  showToast(`Đang sửa: ${item.fullName}`);
 }
   let currentAiJobId = '';
 let currentSourceImage = '';
@@ -1961,9 +2239,11 @@ function normalizeMatterportLink(url) {
         showToast(propertyId ? 'Đã cập nhật căn nhà' : 'Đã thêm căn nhà mới');
         resetPropertyForm();
 
-        setTimeout(() => {
-          loadProperties(false);
-        }, 800);
+       setTimeout(() => {
+  Promise.all([loadProperties(false), loadContacts(false)]).then(() => {
+    renderProperties();
+  });
+}, 800);
       } catch (error) {
         console.error(error);
         showToast('Có lỗi khi lưu căn nhà');
@@ -1978,11 +2258,12 @@ function normalizeMatterportLink(url) {
     document.getElementById('typeFilterProperty').addEventListener('change', renderProperties);
     document.getElementById('propertyStatusFilter').addEventListener('change', renderProperties);
     document.getElementById('thumbnail').addEventListener('input', (e) => setPreview(e.target.value));
-
-    Promise.all([loadBookings(false), loadProperties(false)]).then(() => {
-      updateDashboard();
-      switchTab('tong-quan');
-    });
+document.getElementById('contactSearchInput')?.addEventListener('input', renderContacts);
+document.getElementById('contactRoleFilter')?.addEventListener('change', renderContacts);
+  Promise.all([loadBookings(false), loadProperties(false), loadContacts(false)]).then(() => {
+  updateDashboard();
+  switchTab('tong-quan');
+});
   </script>
 </body>
 </html>
